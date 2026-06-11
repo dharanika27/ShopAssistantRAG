@@ -1,0 +1,32 @@
+# Normalize line endings: store text as LF in the repo and check out as LF on
+# every platform. Quiets the Windows "LF will be replaced by CRLF" warnings and
+# keeps diffs clean across contributors.
+* text=auto eol=lf
+
+# Shell scripts must stay LF — they run inside Linux containers and break with
+# CRLF (e.g. docker/entrypoint-backend.sh, init.sh).
+*.sh text eol=lf
+
+# Common text files (explicit for clarity).
+*.py    text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.toml  text eol=lf
+*.ini   text eol=lf
+*.csv   text eol=lf
+*.sql   text eol=lf
+*.env.example text eol=lf
+Dockerfile text eol=lf
+
+# Binary assets — never normalize (protects placeholder images, etc.).
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
