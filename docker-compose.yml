@@ -71,6 +71,10 @@ services:
     environment:
       # The UI reaches the backend over the shared network by service name (AC-3).
       BACKEND_URL: http://backend:8000
+    volumes:
+      # Mount placeholder images (read-only) so real fallback artwork dropped
+      # into frontend/assets/ is picked up without rebuilding the image.
+      - ./frontend/assets:/app/frontend/assets:ro
     ports:
       - "8501:8501"
     depends_on:

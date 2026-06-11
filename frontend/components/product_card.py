@@ -10,6 +10,7 @@ from decimal import Decimal
 
 import streamlit as st
 from api_client import ProductView
+from components.placeholders import image_source_for
 
 _RUPEE_SIGN = "₹"
 
@@ -41,8 +42,13 @@ def render_product_card(product: ProductView) -> None:
 
 
 def _render_image(product: ProductView) -> None:
-    if product.image_url:
-        st.image(product.image_url, use_container_width=True)
+    """Render the product image, falling back to a category placeholder.
+
+    Uses the real ``image_url`` when it is reachable; otherwise shows the
+    category-specific placeholder so a missing/throttled image never renders as
+    a broken image (see :mod:`components.placeholders`).
+    """
+    st.image(image_source_for(product.image_url, product.category), use_container_width=True)
 
 
 def _render_stock_badge(product: ProductView) -> None:
