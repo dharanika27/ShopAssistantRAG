@@ -333,6 +333,46 @@ class TestTranscriptRecorded:
         assert len(history) == 2  # user + assistant
 
 
+class TestOutOfCatalog:
+    def test_unsupported_product_with_price_short_circuits_no_retrieval(self) -> None:
+        # "smartphone under 20000" extracts a price, but must NOT retrieve on it.
+        catalog = {"P1": _product("P1", price="1299")}
+        orchestrator, retriever, generator = _build(
+            extractions=[QueryFilters(max_price=Decimal("20000"))],
+            id_batches=[["P1"]],
+            catalog=catalog,
+        )
+
+        result = orchestrator.handle_turn(_SESSION, "I need a smartphone under 20000")
+
+        assert result.products == []  # no pivot cards
+        assert retriever.calls == []  # retrieval never ran
+        assert generator.calls == []  # answer model never called
+        assert "smartphone" in result.reply.lower()
+        assert "catalog" in result.reply.lower()
+
+    def test_plain_out_of_catalog_query_returns_no_match(self) -> None:
+        orchestrator, retriever, _ = _build(
+            extractions=[QueryFilters()], id_batches=[["P1"]], catalog={},
+        )
+        result = orchestrator.handle_turn(_SESSION, "do you sell laptops")
+        assert result.products == []
+        assert retriever.calls == []
+        assert "laptop" in result.reply.lower()
+
+    def test_in_catalog_query_with_price_is_not_blocked(self) -> None:
+        # A legitimate catalog query with a price must still retrieve normally.
+        catalog = {"P1": _product("P1", price="1999", category=Category.SHOES)}
+        orchestrator, retriever, _ = _build(
+            extractions=[QueryFilters(category=Category.SHOES, max_price=Decimal("2000"))],
+            id_batches=[["P1"]],
+            catalog=catalog,
+        )
+        result = orchestrator.handle_turn(_SESSION, "show me shoes under 2000")
+        assert retriever.calls != []  # retrieval ran
+        assert [p.product_id for p in result.products] == ["P1"]
+
+
 @pytest.fixture(autouse=True)
 def _no_network() -> None:
     """Guard: these tests must never touch a real network boundary."""

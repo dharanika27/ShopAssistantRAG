@@ -28,12 +28,14 @@ the extractor's structured output plus light keyword rules kept here so the
 behavior stays testable with mocked services (session-memory-design.md §4).
 """
 
+import re
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, auto
 from typing import Protocol
 
 from backend.core.logging import get_logger
+from backend.domain.enums import Category
 from backend.domain.models import Product, QueryFilters
 from backend.services.query_state import QueryStateManager, SessionState, TurnRole
 
@@ -52,12 +54,31 @@ _CHEAPER_PHRASES = ("cheaper", "less expensive", "lower price", "more affordable
                     "budget")
 _MERGEABLE_FIELDS = ("brand", "color", "category", "gender", "min_price", "max_price")
 
+# Product types the catalog does not stock. A query naming one of these is a
+# clean no-match even when it also carries a parseable filter (e.g. a price), so
+# "smartphone under 20000" returns a friendly "not in our catalog" reply instead
+# of retrieving unrelated products on the price filter alone. Curated and
+# extensible — matched as whole, lower-cased word tokens.
+_OUT_OF_CATALOG_TERMS = frozenset({
+    "laptop", "laptops", "computer", "computers", "pc", "desktop",
+    "smartphone", "smartphones", "phone", "phones", "mobile", "iphone", "android",
+    "tablet", "tablets", "ipad", "tv", "television", "televisions", "monitor",
+    "camera", "cameras", "headphone", "headphones", "earphone", "earphones",
+    "earbud", "earbuds", "speaker", "speakers", "console", "playstation", "xbox",
+    "watch", "watches", "smartwatch",
+    "grocery", "groceries", "food", "snack", "snacks", "beverage", "drink", "drinks",
+    "furniture", "sofa", "mattress", "fridge", "refrigerator", "microwave",
+    "book", "books", "toy", "toys", "jewelry", "jewellery", "perfume", "fragrance",
+    "makeup", "cosmetic", "cosmetics", "medicine", "car", "bicycle",
+})
+
 
 class TurnIntent(Enum):
     """The orchestrator's classification of an incoming turn."""
 
     GREETING = auto()
     INVALID = auto()
+    OUT_OF_CATALOG = auto()
     RESET = auto()
     CHEAPER = auto()
     CATEGORY_CHANGE = auto()
@@ -122,6 +143,8 @@ class ChatOrchestrator:
     def _dispatch(
         self, session_id: str, message: str, extracted: QueryFilters, intent: TurnIntent
     ) -> ChatResult:
+        if intent is TurnIntent.OUT_OF_CATALOG:
+            return ChatResult(reply=_out_of_catalog_reply(message), products=[])
         if intent in (TurnIntent.GREETING, TurnIntent.INVALID):
             return ChatResult(reply=_conversational_reply(intent), products=[])
         filters = self._apply_transition(session_id, extracted, intent)
@@ -166,6 +189,8 @@ def _classify_intent(
     normalized = message.strip().lower()
     if _matches_any(normalized, _RESET_PHRASES):
         return TurnIntent.RESET
+    if _out_of_catalog_term(message) is not None:
+        return TurnIntent.OUT_OF_CATALOG
     if _matches_any(normalized, _CHEAPER_PHRASES):
         return TurnIntent.CHEAPER
     if _is_category_change(extracted, state):
@@ -227,6 +252,24 @@ def _lower_price_ceiling(state: SessionState) -> None:
     if not candidates:
         return
     state.filters.max_price = min(candidates) * _CHEAPER_FACTOR
+
+
+def _out_of_catalog_term(message: str) -> str | None:
+    """Return the first out-of-catalog product token in ``message``, else None."""
+    for token in re.findall(r"[a-z]+", message.lower()):
+        if token in _OUT_OF_CATALOG_TERMS:
+            return token
+    return None
+
+
+def _out_of_catalog_reply(message: str) -> str:
+    """Friendly no-match for an unsupported product type, listing real categories."""
+    term = _out_of_catalog_term(message) or "that"
+    categories = ", ".join(category.value for category in Category)
+    return (
+        f'Sorry, "{term}" isn\'t in our catalog. We carry {categories}. '
+        "Tell me what you'd like from those and I'll find matches."
+    )
 
 
 def _conversational_reply(intent: TurnIntent) -> str:
