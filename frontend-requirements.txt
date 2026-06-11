@@ -1,0 +1,5 @@
+# Frontend (Streamlit) runtime dependencies (E10-S1).
+# The UI speaks only HTTP to the backend, so it needs no backend SDKs.
+
+streamlit==1.55.0
+requests==2.32.5

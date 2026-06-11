@@ -1,0 +1,81 @@
+{
+  "name": "ShopAssistantRAG",
+  "description": "Conversational AI shopping assistant (hybrid RAG over a product catalog).",
+  "generated_from": [
+    "docs/BRD.md",
+    "specs/stories/dependency-graph.md",
+    "specs/design/"
+  ],
+  "stack": {
+    "backend": {
+      "language": "python",
+      "version": "3.11",
+      "framework": "fastapi",
+      "package_manager": "pip",
+      "linter": "ruff",
+      "typechecker": "mypy",
+      "test_runner": "pytest"
+    },
+    "frontend": {
+      "language": "python",
+      "framework": "streamlit",
+      "package_manager": "pip"
+    },
+    "database": {
+      "primary": "mysql",
+      "secondary": "pinecone"
+    },
+    "ai": {
+      "embeddings": "text-embedding-004",
+      "generation": "gemini-1.5-flash",
+      "orchestration": "langchain"
+    },
+    "deployment": {
+      "method": "docker-compose",
+      "services": [
+        "backend",
+        "frontend",
+        "mysql"
+      ]
+    }
+  },
+  "api_base_url": "http://localhost:8000",
+  "ui_base_url": "http://localhost:8501",
+  "health_check": "/api/health",
+  "mode": "docker",
+  "evaluation": {
+    "api_base_url": "http://localhost:8000",
+    "ui_base_url": "http://localhost:8501",
+    "health_check": "/api/health",
+    "design_score_threshold": 7,
+    "design_max_iterations": 10,
+    "test_corpus_dir": "tests"
+  },
+  "execution": {
+    "default_mode": "full",
+    "max_self_heal_attempts": 3,
+    "max_auto_iterations": 50,
+    "coverage_threshold": 0,
+    "session_chaining": true,
+    "agent_team_size": "auto",
+    "teammate_model": "sonnet"
+  },
+  "verification": {
+    "mode": "docker",
+    "health_check": {
+      "url": "http://localhost:8000/api/health",
+      "retries": 5,
+      "backoff_seconds": 2
+    },
+    "backend_url": "http://localhost:8000",
+    "frontend_url": "http://localhost:8501",
+    "docker": {
+      "compose_file": "docker-compose.yml",
+      "services": [
+        "backend",
+        "frontend",
+        "mysql"
+      ]
+    }
+  }
+}

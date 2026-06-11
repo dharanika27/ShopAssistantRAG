@@ -1,0 +1,230 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ShopAssistantRAG API",
+    "version": "1.0.0",
+    "description": "Conversational AI shopping assistant. Hybrid RAG over a product catalog. No authentication (out of scope per BRD). Source: docs/BRD.md v1.0."
+  },
+  "servers": [
+    { "url": "http://localhost:8000", "description": "Local dev / Docker" }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Liveness/readiness probe",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Service is up",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "summary": "Conversational RAG turn",
+        "operationId": "postChat",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChatRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Grounded reply plus up to 5 products",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChatResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error (missing/empty message or session_id)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "503": {
+            "description": "Downstream service (Gemini/Pinecone/MySQL) unavailable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "summary": "List/filter catalog products",
+        "operationId": "getProducts",
+        "parameters": [
+          { "name": "brand", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "required": false, "schema": { "$ref": "#/components/schemas/Category" } },
+          { "name": "gender", "in": "query", "required": false, "schema": { "$ref": "#/components/schemas/Gender" } },
+          { "name": "color", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "min_price", "in": "query", "required": false, "schema": { "type": "number", "minimum": 0 } },
+          { "name": "max_price", "in": "query", "required": false, "schema": { "type": "number", "minimum": 0 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching products (empty array when no matches)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Product" }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid enum or non-numeric price",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/filters": {
+      "get": {
+        "summary": "Distinct filter option values",
+        "operationId": "getFilters",
+        "responses": {
+          "200": {
+            "description": "Filter options for UI controls",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FilterOptions" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "string",
+        "enum": ["Shoes", "Clothing", "Accessories", "Sportswear", "Bags"]
+      },
+      "Gender": {
+        "type": "string",
+        "enum": ["Men", "Women", "Unisex", "Kids"]
+      },
+      "Product": {
+        "type": "object",
+        "required": ["product_id", "name", "category", "price", "stock", "in_stock"],
+        "properties": {
+          "product_id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "brand": { "type": "string", "nullable": true },
+          "category": { "$ref": "#/components/schemas/Category" },
+          "gender": { "oneOf": [{ "$ref": "#/components/schemas/Gender" }, { "type": "null" }] },
+          "color": { "type": "string", "nullable": true },
+          "price": { "type": "number", "minimum": 0 },
+          "image_url": { "type": "string", "nullable": true },
+          "stock": { "type": "integer", "minimum": 0 },
+          "in_stock": { "type": "boolean" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": { "type": "string", "example": "ok" },
+          "service": { "type": "string", "example": "shopassistant-backend" },
+          "version": { "type": "string", "example": "1.0" }
+        }
+      },
+      "ChatRequest": {
+        "type": "object",
+        "required": ["session_id", "message"],
+        "properties": {
+          "session_id": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      },
+      "ChatResponse": {
+        "type": "object",
+        "required": ["reply", "products"],
+        "properties": {
+          "reply": { "type": "string" },
+          "products": {
+            "type": "array",
+            "maxItems": 5,
+            "items": { "$ref": "#/components/schemas/Product" }
+          }
+        }
+      },
+      "FilterOptions": {
+        "type": "object",
+        "required": ["brands", "categories", "genders", "colors", "price_range"],
+        "properties": {
+          "brands": { "type": "array", "items": { "type": "string" } },
+          "categories": { "type": "array", "items": { "$ref": "#/components/schemas/Category" } },
+          "genders": { "type": "array", "items": { "$ref": "#/components/schemas/Gender" } },
+          "colors": { "type": "array", "items": { "type": "string" } },
+          "price_range": {
+            "type": "object",
+            "required": ["min", "max"],
+            "properties": {
+              "min": { "type": "number" },
+              "max": { "type": "number" }
+            }
+          }
+        }
+      },
+      "ErrorEnvelope": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": ["GEMINI_UNAVAILABLE", "PINECONE_UNAVAILABLE", "MYSQL_UNAVAILABLE", "INTERNAL_ERROR"]
+              },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "loc": { "type": "array", "items": { "type": "string" } },
+                "msg": { "type": "string" },
+                "type": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

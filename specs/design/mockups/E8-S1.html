@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+  Mockup: E8-S1 — Product catalog grid with cards
+  Story layer: UI (Streamlit equivalent rendered as static HTML)
+  Data source: GET /api/products  (see specs/design/api-contracts.md)
+  Field names match canonical Product shape: product_id, name, description, brand,
+  category, gender, color, price, image_url, stock, in_stock, tags.
+
+  States:
+   - Happy path (default): grid of product cards.
+   - Empty state: toggle "Show empty state" to simulate GET /api/products returning [].
+   - Error state: toggle "Show error state" to simulate the catalog endpoint being unavailable
+     (BRD §9.1 — MYSQL_UNAVAILABLE friendly message).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>E8-S1 — Product Catalog Grid</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --ink:#1d2433; --muted:#6b7280; --accent:#2563eb; --line:#e5e7eb; --danger:#b91c1c; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:#111827; color:#fff; padding:16px 24px; display:flex; align-items:center; gap:12px; }
+  header h1 { font-size:18px; margin:0; }
+  header .tag { font-size:12px; background:#374151; padding:3px 8px; border-radius:999px; color:#cbd5e1; }
+  .controls { padding:12px 24px; display:flex; gap:16px; align-items:center; background:#fff; border-bottom:1px solid var(--line); font-size:13px; }
+  .controls label { display:flex; gap:6px; align-items:center; cursor:pointer; color:var(--muted); }
+  .api-note { font-family: ui-monospace, Menlo, monospace; font-size:12px; color:var(--accent); background:#eff6ff; padding:6px 24px; border-bottom:1px solid var(--line); }
+  main { padding:24px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:18px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+  .card .img { height:160px; background:#e5e7eb center/cover no-repeat; display:flex; align-items:center; justify-content:center; color:#9ca3af; font-size:13px; }
+  .card .body { padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+  .card .name { font-weight:600; font-size:15px; line-height:1.25; }
+  .card .meta { font-size:12px; color:var(--muted); }
+  .card .price { font-size:16px; font-weight:700; margin-top:2px; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; font-weight:600; }
+  .in { background:#dcfce7; color:#166534; }
+  .out { background:#fee2e2; color:#991b1b; }
+  .tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+  .tags span { font-size:10px; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:6px; }
+  .empty, .error { text-align:center; padding:60px 20px; color:var(--muted); }
+  .error { color:var(--danger); }
+  .empty h2, .error h2 { font-size:16px; margin:0 0 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ShopAssistant — Catalog</h1>
+  <span class="tag">E8-S1 · UI</span>
+</header>
+<div class="api-note">On load: GET /api/products → render grid of product cards (E8-S1 AC-1)</div>
+<div class="controls">
+  <strong>Simulate state:</strong>
+  <label><input type="radio" name="state" value="happy" checked onchange="render()" /> Happy path</label>
+  <label><input type="radio" name="state" value="empty" onchange="render()" /> Empty catalog</label>
+  <label><input type="radio" name="state" value="error" onchange="render()" /> Catalog unavailable (error)</label>
+</div>
+<main id="root"></main>
+
+<script>
+  // Mock data: shape matches GET /api/products response (Product objects).
+  const PRODUCTS = [
+    { product_id:"P1001", name:"Nike Revolution 6", description:"Lightweight everyday running shoes with soft foam cushioning.", brand:"Nike", category:"Shoes", gender:"Men", color:"Red", price:2799.00, image_url:"", stock:12, in_stock:true, tags:["Running","Sports"] },
+    { product_id:"P1002", name:"Adidas Ultraboost Light", description:"Responsive cushioning for daily runs.", brand:"Adidas", category:"Shoes", gender:"Women", color:"White", price:8999.00, image_url:"", stock:4, in_stock:true, tags:["Running"] },
+    { product_id:"P1003", name:"Puma Essentials Tee", description:"Soft cotton crew-neck t-shirt.", brand:"Puma", category:"Clothing", gender:"Unisex", color:"Black", price:799.00, image_url:"", stock:0, in_stock:false, tags:["Casual"] },
+    { product_id:"P1004", name:"Nike Brasilia Duffel", description:"Durable gym duffel bag with multiple compartments.", brand:"Nike", category:"Bags", gender:"Unisex", color:"Blue", price:1999.00, image_url:"", stock:23, in_stock:true, tags:["Sports","Gym"] },
+    { product_id:"P1005", name:"Adidas Running Cap", description:"Breathable cap for outdoor runs.", brand:"Adidas", category:"Accessories", gender:"Unisex", color:"Black", price:599.00, image_url:"", stock:7, in_stock:true, tags:["Running","Casual"] },
+    { product_id:"P1006", name:"Puma Active Track Jacket", description:"Lightweight sportswear jacket for training.", brand:"Puma", category:"Sportswear", gender:"Women", color:"Blue", price:3499.00, image_url:"", stock:0, in_stock:false, tags:["Sports","Training"] }
+  ];
+
+  function inr(n){ return "₹" + Number(n).toLocaleString("en-IN", {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+  function card(p){
+    const stockBadge = p.in_stock
+      ? `<span class="badge in">In stock (${p.stock})</span>`
+      : `<span class="badge out">Out of stock</span>`;
+    const tags = (p.tags||[]).map(t=>`<span>${t}</span>`).join("");
+    return `<div class="card">
+      <div class="img">${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover"/>` : "image_url"}</div>
+      <div class="body">
+        <div class="name">${p.name}</div>
+        <div class="meta">${p.brand} · ${p.category} · ${p.gender} · ${p.color}</div>
+        <div class="price">${inr(p.price)}</div>
+        ${stockBadge}
+        <div class="tags">${tags}</div>
+      </div>
+    </div>`;
+  }
+
+  function render(){
+    const state = document.querySelector('input[name=state]:checked').value;
+    const root = document.getElementById('root');
+    if (state === "error"){
+      // BRD §9.1 MYSQL_UNAVAILABLE friendly message (E8-S1 AC-4)
+      root.innerHTML = `<div class="error"><h2>We are unable to load product details right now.</h2><p>Please try again later.</p></div>`;
+      return;
+    }
+    if (state === "empty"){
+      root.innerHTML = `<div class="empty"><h2>No products to show.</h2><p>The catalog is empty.</p></div>`;
+      return;
+    }
+    root.innerHTML = `<div class="grid">${PRODUCTS.map(card).join("")}</div>`;
+  }
+  render();
+</script>
+</body>
+</html>

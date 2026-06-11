@@ -1,0 +1,49 @@
+{
+  "group": "D",
+  "stories": [
+    "E5-S1",
+    "E5-S2",
+    "E5-S3"
+  ],
+  "features": [
+    "F040",
+    "F041",
+    "F042",
+    "F043",
+    "F044",
+    "F045",
+    "F046",
+    "F047",
+    "F048"
+  ],
+  "contract": {
+    "architecture_checks": {
+      "layering": {
+        "required": true,
+        "description": "One-way imports across layers per specs/design/system-design.md."
+      },
+      "typing": {
+        "required": true,
+        "description": "All functions type-annotated; mypy clean per code-gen principles."
+      },
+      "folder_structure": {
+        "required": true,
+        "description": "Files match specs/design/component-map.md for this group."
+      },
+      "env_vars": {
+        "required": false,
+        "description": "Secrets/config via .env only; no hardcoded secrets (BRD NFR-3)."
+      },
+      "migrations": {
+        "required": false,
+        "description": "MySQL schema provisioned idempotently via sql/schema.sql."
+      },
+      "files_must_exist": [
+        "backend/services/filter_extractor.py",
+        "backend/prompts/filter_extraction.txt",
+        "backend/services/hybrid_retriever.py",
+        "backend/services/hydrator.py"
+      ]
+    }
+  }
+}

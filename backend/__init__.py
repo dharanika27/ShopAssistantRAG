@@ -1,0 +1,1 @@
+"""ShopAssistantRAG backend package."""

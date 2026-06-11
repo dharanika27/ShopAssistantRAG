@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--
+  Mockup: E8-S3 — Conversational chat interface with session (PRIMARY feature)
+  Story layer: UI
+  Data source: POST /api/chat  { session_id, message } → { reply, products[<=5] }
+  (see specs/design/api-contracts.md)
+  Field names match canonical chat + Product shape.
+
+  States demonstrated:
+   - Happy path: NL reply + up to 5 grounded product cards inline (AC-1, AC-2).
+   - Multi-turn refinement: "only red ones" narrows within the same session_id (AC-4).
+   - No-match: friendly message + zero product cards (AC-5).
+   - session_id stable per browser session, sent on every call (AC-3).
+   - Transcript of previous turns stays visible (AC-6).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>E8-S3 — Conversational Assistant</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --ink:#1d2433; --muted:#6b7280; --accent:#2563eb; --line:#e5e7eb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:#111827; color:#fff; padding:16px 24px; display:flex; gap:12px; align-items:center; }
+  header h1 { font-size:18px; margin:0; }
+  header .tag { font-size:12px; background:#374151; padding:3px 8px; border-radius:999px; color:#cbd5e1; }
+  header .sid { margin-left:auto; font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#9ca3af; }
+  .api-note { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--accent); background:#eff6ff; padding:6px 24px; border-bottom:1px solid var(--line); }
+  .chat { max-width:820px; margin:0 auto; padding:20px 16px 120px; }
+  .turn { margin:14px 0; }
+  .bubble { display:inline-block; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.4; max-width:80%; }
+  .user { text-align:right; }
+  .user .bubble { background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .bot .bubble { background:#fff; border:1px solid var(--line); border-bottom-left-radius:4px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; margin-top:10px; }
+  .pcard { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; }
+  .pcard .name { font-weight:600; font-size:13px; }
+  .pcard .meta { font-size:11px; color:var(--muted); margin:3px 0; }
+  .pcard .price { font-weight:700; font-size:14px; }
+  .badge { display:inline-block; font-size:10px; padding:1px 7px; border-radius:999px; font-weight:600; margin-top:4px; }
+  .in { background:#dcfce7; color:#166534; } .out { background:#fee2e2; color:#991b1b; }
+  .composer { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line); padding:14px 16px; }
+  .composer .inner { max-width:820px; margin:0 auto; display:flex; gap:10px; }
+  .composer input { flex:1; padding:11px 14px; border:1px solid var(--line); border-radius:10px; font-size:14px; }
+  .composer button { padding:11px 20px; border:0; border-radius:10px; background:var(--accent); color:#fff; font-size:14px; cursor:pointer; }
+  .suggest { padding:8px 16px; max-width:820px; margin:0 auto; display:flex; gap:8px; flex-wrap:wrap; }
+  .suggest button { font-size:12px; background:#eef2ff; color:#3730a3; border:0; border-radius:999px; padding:6px 12px; cursor:pointer; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ShopAssistant — Chat</h1><span class="tag">E8-S3 · UI</span>
+  <span class="sid">session_id: <span id="sid"></span></span>
+</header>
+<div class="api-note">Every send → POST /api/chat { session_id, message } → { reply, products[≤5] } (E8-S3 AC-1..AC-3)</div>
+
+<div class="suggest">
+  <span style="font-size:12px;color:#6b7280;align-self:center">Try:</span>
+  <button onclick="quick('Show me Nike shoes')">Show me Nike shoes</button>
+  <button onclick="quick('only red ones')">only red ones (refine)</button>
+  <button onclick="quick('cheaper options')">cheaper options</button>
+  <button onclick="quick('show me laptops')">show me laptops (no-match)</button>
+  <button onclick="quick('hi')">hi (small talk)</button>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="composer">
+  <div class="inner">
+    <input id="msg" placeholder="Describe what you're looking for…" onkeydown="if(event.key==='Enter')send()" />
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+
+<script>
+  // Stable session_id per browser session (E8-S3 AC-3)
+  const SESSION_ID = (crypto.randomUUID ? crypto.randomUUID() : "sess-" + Date.now());
+  document.getElementById("sid").textContent = SESSION_ID;
+
+  function inr(n){ return "₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  // Mock products that match POST /api/chat -> products[] shape
+  const NIKE = [
+    { product_id:"P1001", name:"Nike Revolution 6", brand:"Nike", category:"Shoes", gender:"Men", color:"Red", price:2799.00, stock:12, in_stock:true, tags:["Running"] },
+    { product_id:"P1101", name:"Nike Pegasus 40", brand:"Nike", category:"Shoes", gender:"Men", color:"Black", price:9499.00, stock:5, in_stock:true, tags:["Running"] },
+    { product_id:"P1102", name:"Nike Court Vision", brand:"Nike", category:"Shoes", gender:"Unisex", color:"White", price:4299.00, stock:8, in_stock:true, tags:["Casual"] }
+  ];
+
+  // Mock backend: emulates the chat orchestration response per message (grounded only).
+  function mockChat(message){
+    const m = message.toLowerCase();
+    if (["hi","hello","hey"].includes(m.trim()))
+      return { reply:"Hi! I can help you discover products from our catalog — try 'red Nike shoes under ₹3000'.", products:[] };
+    if (m.includes("laptop") || m.includes("asdfgh"))
+      return { reply:"I couldn't find anything matching that. We carry Shoes, Clothing, Accessories, Sportswear and Bags — want to browse one of those?", products:[] };
+    if (m.includes("red"))
+      return { reply:"Here are the red Nike shoes I found.", products: NIKE.filter(p=>p.color==="Red") };
+    if (m.includes("cheaper"))
+      return { reply:"Here are some lower-priced Nike shoes.", products: NIKE.filter(p=>p.price<5000) };
+    if (m.includes("nike"))
+      return { reply:"Here are some Nike shoes you might like.", products: NIKE };
+    return { reply:"Here are a few products that match your request.", products: NIKE.slice(0,2) };
+  }
+
+  function pcard(p){
+    return `<div class="pcard">
+      <div class="name">${p.name}</div>
+      <div class="meta">${p.brand} · ${p.category} · ${p.color} · ${p.gender}</div>
+      <div class="price">${inr(p.price)}</div>
+      ${p.in_stock?`<span class="badge in">In stock</span>`:`<span class="badge out">Out of stock</span>`}
+    </div>`;
+  }
+
+  function append(role, html){
+    const chat = document.getElementById("chat");
+    chat.insertAdjacentHTML("beforeend", `<div class="turn ${role}"><div class="bubble">${html}</div></div>`);
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  function send(){
+    const input = document.getElementById("msg");
+    const message = input.value.trim();
+    if (!message) return;            // empty message would be a 422 server-side (E7-S2 AC-4)
+    input.value = "";
+    append("user", message);
+    // POST /api/chat { session_id: SESSION_ID, message }
+    const res = mockChat(message);
+    const chat = document.getElementById("chat");
+    let block = `<div class="turn bot"><div class="bubble">${res.reply}</div>`;
+    if (res.products.length){
+      block += `<div class="cards">${res.products.slice(0,5).map(pcard).join("")}</div>`;
+    }
+    block += `</div>`;
+    chat.insertAdjacentHTML("beforeend", block);
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+
+  function quick(t){ document.getElementById("msg").value = t; send(); }
+
+  append("bot", "Hi! Describe what you're shopping for and I'll find matching products. For example: <em>“red Nike shoes under ₹3000”</em>.");
+</script>
+</body>
+</html>

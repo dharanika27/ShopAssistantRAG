@@ -1,0 +1,195 @@
+{
+  "group": "F",
+  "stories": [
+    "E7-S1",
+    "E7-S2",
+    "E7-S3"
+  ],
+  "features": [
+    "F062",
+    "F063",
+    "F064",
+    "F065",
+    "F066",
+    "F067",
+    "F068",
+    "F069",
+    "F070",
+    "F071",
+    "F072",
+    "F073"
+  ],
+  "contract": {
+    "architecture_checks": {
+      "layering": {
+        "required": true,
+        "description": "One-way imports across layers per specs/design/system-design.md."
+      },
+      "typing": {
+        "required": true,
+        "description": "All functions type-annotated; mypy clean per code-gen principles."
+      },
+      "folder_structure": {
+        "required": true,
+        "description": "Files match specs/design/component-map.md for this group."
+      },
+      "env_vars": {
+        "required": true,
+        "description": "Secrets/config via .env only; no hardcoded secrets (BRD NFR-3)."
+      },
+      "migrations": {
+        "required": false,
+        "description": "MySQL schema provisioned idempotently via sql/schema.sql."
+      },
+      "files_must_exist": [
+        "backend/api/main.py",
+        "backend/api/middleware.py",
+        "backend/api/routes/health.py",
+        "backend/api/dependencies.py",
+        "backend/api/routes/chat.py",
+        "backend/api/schemas.py",
+        "backend/api/routes/catalog.py"
+      ]
+    },
+    "api_checks": [
+      {
+        "id": "api-health",
+        "method": "GET",
+        "path": "/api/health",
+        "headers": {},
+        "expected_status": 200,
+        "expected_body": {
+          "status": "ok"
+        },
+        "expect": {
+          "status": 200,
+          "body_contains": [
+            "status",
+            "ok"
+          ]
+        },
+        "description": "GET /api/health returns 200 liveness body (E7-S1, api-contracts \u00a71)."
+      },
+      {
+        "id": "api-chat-validation",
+        "method": "POST",
+        "path": "/api/chat",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "session_id": "s-eval",
+          "message": ""
+        },
+        "expected_status": 422,
+        "expected_body": {},
+        "expect": {
+          "status": 422,
+          "body_contains": [
+            "detail"
+          ]
+        },
+        "description": "POST /api/chat with empty message returns 422 (E7-S2, api-contracts \u00a72)."
+      },
+      {
+        "id": "api-chat-ok",
+        "method": "POST",
+        "path": "/api/chat",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "session_id": "s-eval",
+          "message": "Show me red Nike shoes under 3000"
+        },
+        "expected_status": 200,
+        "expected_body": {},
+        "expect": {
+          "status": 200,
+          "body_contains": [
+            "reply",
+            "products"
+          ]
+        },
+        "description": "POST /api/chat returns grounded reply + products[<=5] (E7-S2, api-contracts \u00a72)."
+      },
+      {
+        "id": "api-products-all",
+        "method": "GET",
+        "path": "/api/products",
+        "headers": {},
+        "expected_status": 200,
+        "expected_body": {},
+        "expect": {
+          "status": 200,
+          "body_contains": []
+        },
+        "description": "GET /api/products returns a JSON array of products (E7-S3, api-contracts \u00a73)."
+      },
+      {
+        "id": "api-products-filter",
+        "method": "GET",
+        "path": "/api/products?category=Shoes",
+        "headers": {},
+        "expected_status": 200,
+        "expected_body": {},
+        "expect": {
+          "status": 200,
+          "body_contains": []
+        },
+        "description": "GET /api/products?category=Shoes applies enum filter, 200 (E7-S3)."
+      },
+      {
+        "id": "api-products-bad-enum",
+        "method": "GET",
+        "path": "/api/products?category=Laptops",
+        "headers": {},
+        "expected_status": 422,
+        "expected_body": {},
+        "expect": {
+          "status": 422,
+          "body_contains": [
+            "detail"
+          ]
+        },
+        "description": "GET /api/products with out-of-enum category returns 422 (E7-S3, api-contracts \u00a73)."
+      },
+      {
+        "id": "api-filters",
+        "method": "GET",
+        "path": "/api/filters",
+        "headers": {},
+        "expected_status": 200,
+        "expected_body": {},
+        "expect": {
+          "status": 200,
+          "body_contains": [
+            "brands",
+            "categories",
+            "genders",
+            "colors",
+            "price_range"
+          ]
+        },
+        "description": "GET /api/filters returns distinct option lists + price_range (E7-S3, api-contracts \u00a74)."
+      }
+    ],
+    "performance_checks": [
+      {
+        "endpoint": "/api/chat",
+        "max_response_time_ms": 5000,
+        "method": "POST"
+      },
+      {
+        "endpoint": "/api/products",
+        "max_response_time_ms": 2000,
+        "method": "GET"
+      },
+      {
+        "endpoint": "/api/health",
+        "max_response_time_ms": 500,
+        "method": "GET"
+      }
+    ]
+  }
+}

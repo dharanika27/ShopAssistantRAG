@@ -1,0 +1,20 @@
+# Secrets — never commit real environment files (E1-S2 AC-3).
+# .env.example is the committed template and must NOT be ignored (E10-S2 AC-2/AC-4).
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+*.swp

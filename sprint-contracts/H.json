@@ -1,0 +1,66 @@
+{
+  "group": "H",
+  "stories": [
+    "E9-S1",
+    "E9-S2",
+    "E10-S1",
+    "E10-S2"
+  ],
+  "features": [
+    "F082",
+    "F083",
+    "F084",
+    "F085",
+    "F086",
+    "F087",
+    "F088",
+    "F089",
+    "F090",
+    "F091",
+    "F092"
+  ],
+  "contract": {
+    "architecture_checks": {
+      "layering": {
+        "required": true,
+        "description": "One-way imports across layers per specs/design/system-design.md."
+      },
+      "typing": {
+        "required": true,
+        "description": "All functions type-annotated; mypy clean per code-gen principles."
+      },
+      "folder_structure": {
+        "required": true,
+        "description": "Files match specs/design/component-map.md for this group."
+      },
+      "env_vars": {
+        "required": true,
+        "description": "Secrets/config via .env only; no hardcoded secrets (BRD NFR-3)."
+      },
+      "migrations": {
+        "required": true,
+        "description": "MySQL schema provisioned idempotently via sql/schema.sql."
+      },
+      "files_must_exist": [
+        "tests/unit/test_filter_extractor.py",
+        "tests/unit/test_hybrid_retriever.py",
+        "tests/unit/test_hydrator.py",
+        "tests/unit/test_query_state.py",
+        "tests/unit/test_chat_orchestrator.py",
+        "pytest.ini",
+        "tests/integration/test_chat_endpoint.py",
+        "tests/integration/test_catalog_endpoints.py",
+        "tests/e2e/test_core_journey.py",
+        "tests/integration/conftest.py",
+        "docker/backend.Dockerfile",
+        "docker/frontend.Dockerfile",
+        "docker/entrypoint-backend.sh",
+        "docker-compose.yml",
+        "requirements.txt",
+        "frontend-requirements.txt",
+        "init.sh",
+        "README.md"
+      ]
+    }
+  }
+}

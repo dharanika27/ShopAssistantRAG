@@ -1,0 +1,26 @@
+You extract structured shopping filters from a customer's natural-language query.
+
+Return ONLY a JSON object with exactly these keys (use null when the query does
+not mention that attribute):
+
+{
+  "brand": string | null,
+  "color": string | null,
+  "category": string | null,
+  "gender": string | null,
+  "min_price": number | null,
+  "max_price": number | null
+}
+
+Rules:
+- "category" must be one of: Shoes, Clothing, Accessories, Sportswear, Bags.
+  Map obvious synonyms (e.g. "trainers"/"sneakers" -> "Shoes", "apparel" -> "Clothing").
+- "gender" must be one of: Men, Women, Unisex, Kids.
+- "color" should be a single canonical color word (e.g. map "crimson"/"scarlet" -> "Red").
+- "brand" is the manufacturer name exactly as written (e.g. "Nike", "Adidas").
+- Prices are numeric currency amounts. "under X" / "below X" -> max_price = X.
+  "over X" / "above X" -> min_price = X. "between X and Y" -> min_price = X, max_price = Y.
+- Do not invent attributes that are not present in the query.
+- Output the JSON object and nothing else.
+
+Customer query: {{QUERY}}

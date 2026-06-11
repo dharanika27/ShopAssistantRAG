@@ -1,0 +1,31 @@
+product_id,name,description,brand,category,gender,color,price,image_url,stock,tags
+P1001,Nike Revolution 6,Lightweight everyday running shoes with soft foam cushioning,Nike,Shoes,Men,Black,2799.00,https://picsum.photos/seed/p1001/600/600,18,Running|Sports
+P1002,Adidas Duramo SL,Breathable mesh running shoes for daily training,Adidas,Shoes,Women,White,3499.00,https://picsum.photos/seed/p1002/600/600,25,Running|Training
+P1003,Puma Smash V2,Classic low-top leather sneakers for casual wear,Puma,Shoes,Unisex,White,2999.00,https://picsum.photos/seed/p1003/600/600,30,Casual|Sneaker
+P1004,Reebok Classic Leather,Iconic retro leather sneakers with timeless style,Reebok,Shoes,Men,Grey,4299.00,https://picsum.photos/seed/p1004/600/600,0,Casual|Sneaker|Retro
+P1005,Skechers Go Walk 6,Slip-on walking shoes with cushioned comfort,Skechers,Shoes,Women,Navy,4599.00,https://picsum.photos/seed/p1005/600/600,12,Walking|Casual
+P1006,New Balance 574,Heritage suede and mesh lifestyle sneakers,New Balance,Shoes,Unisex,Green,6999.00,https://picsum.photos/seed/p1006/600/600,8,Casual|Sneaker|Retro
+P1007,Under Armour Charged Assert 10,Neutral running shoes with responsive cushioning,Under Armour,Shoes,Men,Blue,5499.00,https://picsum.photos/seed/p1007/600/600,16,Running|Sports
+P1008,Nike Air Max SC,Everyday sneakers with visible Air cushioning,Nike,Shoes,Women,Pink,5999.00,https://picsum.photos/seed/p1008/600/600,0,Casual|Sneaker|Lifestyle
+P1009,Adidas Tensaur Kids,Durable hook-and-loop sneakers for active kids,Adidas,Shoes,Kids,Red,2299.00,https://picsum.photos/seed/p1009/600/600,40,Casual|Kids
+P1010,Puma Velocity Nitro 2,Performance running shoes with nitrogen foam,Puma,Shoes,Men,Orange,8999.00,https://picsum.photos/seed/p1010/600/600,6,Running|Performance
+P1011,Nike Sportswear Club Tee,Soft cotton crew-neck t-shirt for everyday wear,Nike,Clothing,Men,White,1299.00,https://picsum.photos/seed/p1011/600/600,50,Casual|Cotton
+P1012,Adidas Essentials Hoodie,Fleece pullover hoodie with kangaroo pocket,Adidas,Clothing,Women,Black,2999.00,https://picsum.photos/seed/p1012/600/600,22,Casual|Fleece|Winter
+P1013,Puma Active Track Pants,Lightweight tapered track pants with side pockets,Puma,Clothing,Men,Grey,2499.00,https://picsum.photos/seed/p1013/600/600,0,Casual|Athleisure
+P1014,Reebok Training Shorts,Quick-dry shorts with stretch waistband,Reebok,Clothing,Women,Teal,1799.00,https://picsum.photos/seed/p1014/600/600,33,Training|Gym
+P1015,New Balance Essentials Tee,Relaxed-fit graphic cotton t-shirt,New Balance,Clothing,Unisex,Maroon,1499.00,https://picsum.photos/seed/p1015/600/600,28,Casual|Cotton
+P1016,Under Armour Tech 2.0 Tee,Loose anti-odor training t-shirt with UA Tech fabric,Under Armour,Clothing,Men,Navy,1999.00,https://picsum.photos/seed/p1016/600/600,45,Training|Gym|Quick-Dry
+P1017,Adidas Tiro Track Jacket,Slim-fit zip jacket with ribbed cuffs,Adidas,Clothing,Women,Blue,3799.00,https://picsum.photos/seed/p1017/600/600,14,Casual|Athleisure
+P1018,Nike Dri-FIT Kids Tee,Sweat-wicking short-sleeve tee for young athletes,Nike,Clothing,Kids,Yellow,999.00,https://picsum.photos/seed/p1018/600/600,60,Kids|Quick-Dry
+P1019,Nike Pro Compression Tights,Tight-fit base-layer training leggings,Nike,Sportswear,Women,Black,3299.00,https://picsum.photos/seed/p1019/600/600,20,Training|Gym|Compression
+P1020,Under Armour RUSH Seamless Top,Performance compression top with energy-return fabric,Under Armour,Sportswear,Men,Red,3999.00,https://picsum.photos/seed/p1020/600/600,0,Training|Performance|Compression
+P1021,Adidas Techfit Sports Bra,Medium-support sports bra with moisture-wicking knit,Adidas,Sportswear,Women,Purple,2199.00,https://picsum.photos/seed/p1021/600/600,26,Gym|Yoga|Training
+P1022,Puma Train Favourite Joggers,Tapered training joggers with dryCELL technology,Puma,Sportswear,Unisex,Olive,2899.00,https://picsum.photos/seed/p1022/600/600,17,Training|Athleisure|Quick-Dry
+P1023,Nike Brasilia Duffel,Spacious gym duffel bag with ventilated shoe pocket,Nike,Bags,Unisex,Black,2499.00,https://picsum.photos/seed/p1023/600/600,21,Gym|Travel|Duffel
+P1024,Adidas Linear Backpack,Everyday backpack with padded laptop sleeve,Adidas,Bags,Unisex,Navy,1999.00,https://picsum.photos/seed/p1024/600/600,35,Casual|Travel|Laptop
+P1025,Puma Phase Sling Bag,Compact crossbody sling for essentials,Puma,Bags,Women,Pink,1199.00,https://picsum.photos/seed/p1025/600/600,0,Casual|Crossbody
+P1026,Under Armour Hustle 5.0 Backpack,Water-resistant backpack with laptop protection,Under Armour,Bags,Men,Grey,3299.00,https://picsum.photos/seed/p1026/600/600,13,Travel|Laptop|Water-Resistant
+P1027,Nike Heritage Cap,Adjustable cotton-twill cap with embroidered logo,Nike,Accessories,Unisex,White,1099.00,https://picsum.photos/seed/p1027/600/600,48,Casual|Headwear
+P1028,Adidas Performance Crew Socks,Cushioned crew socks three-pair pack,Adidas,Accessories,Unisex,White,799.00,https://picsum.photos/seed/p1028/600/600,80,Gym|Everyday
+P1029,Reebok Knit Beanie,Warm ribbed-knit beanie for cold-weather wear,Reebok,Accessories,Men,Black,899.00,https://picsum.photos/seed/p1029/600/600,0,Winter|Headwear
+P1030,Puma Training Gym Towel,Soft absorbent microfiber towel for workouts,Puma,Accessories,Women,Teal,649.00,https://picsum.photos/seed/p1030/600/600,55,Gym|Training

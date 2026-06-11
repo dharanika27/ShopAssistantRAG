@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+  Mockup: E8-S2 — Traditional filter controls
+  Story layer: UI
+  Data sources:
+    GET /api/filters  → populate control options (brands, categories, genders, colors, price_range)
+    GET /api/products?brand=&category=&gender=&color=&min_price=&max_price= → filtered grid
+  Field names match api-contracts.md filter params and Product shape.
+
+  States:
+   - Happy path: filters populated, selecting re-queries products.
+   - Empty result: select Brand=Puma + Category=Bags (no match) → empty list with HTTP 200 (E8-S2 AC, E7-S3 AC-4).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>E8-S2 — Traditional Filters</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --ink:#1d2433; --muted:#6b7280; --accent:#2563eb; --line:#e5e7eb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: system-ui,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:#111827; color:#fff; padding:16px 24px; display:flex; gap:12px; align-items:center; }
+  header h1 { font-size:18px; margin:0; }
+  header .tag { font-size:12px; background:#374151; padding:3px 8px; border-radius:999px; color:#cbd5e1; }
+  .api-note { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--accent); background:#eff6ff; padding:6px 24px; border-bottom:1px solid var(--line); }
+  .layout { display:grid; grid-template-columns:260px 1fr; gap:0; }
+  aside { background:#fff; border-right:1px solid var(--line); padding:20px; min-height:80vh; }
+  aside h2 { font-size:14px; margin:0 0 14px; }
+  .field { margin-bottom:16px; }
+  .field label { display:block; font-size:12px; color:var(--muted); margin-bottom:5px; font-weight:600; }
+  select, input[type=range] { width:100%; }
+  select { padding:7px; border:1px solid var(--line); border-radius:8px; font-size:13px; background:#fff; }
+  .pricewrap { font-size:12px; color:var(--muted); margin-top:4px; display:flex; justify-content:space-between; }
+  button { width:100%; padding:9px; border:0; border-radius:8px; font-size:13px; cursor:pointer; }
+  .clear { background:#f1f5f9; color:#334155; margin-top:6px; }
+  main { padding:24px; }
+  .summary { font-size:13px; color:var(--muted); margin-bottom:14px; font-family:ui-monospace,Menlo,monospace; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .card .name { font-weight:600; font-size:14px; }
+  .card .meta { font-size:12px; color:var(--muted); margin:4px 0; }
+  .card .price { font-weight:700; }
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; font-weight:600; margin-top:6px; }
+  .in { background:#dcfce7; color:#166534; } .out { background:#fee2e2; color:#991b1b; }
+  .empty { text-align:center; padding:60px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header><h1>ShopAssistant — Browse & Filter</h1><span class="tag">E8-S2 · UI</span></header>
+<div class="api-note">Controls populated from GET /api/filters · changes re-query GET /api/products?{params} (E8-S2 AC-1, AC-2)</div>
+<div class="layout">
+  <aside>
+    <h2>Filters</h2>
+    <div class="field"><label>Brand</label><select id="brand" onchange="apply()"></select></div>
+    <div class="field"><label>Category</label><select id="category" onchange="apply()"></select></div>
+    <div class="field"><label>Gender</label><select id="gender" onchange="apply()"></select></div>
+    <div class="field"><label>Color</label><select id="color" onchange="apply()"></select></div>
+    <div class="field">
+      <label>Max price (min_price=range.min, max_price=slider)</label>
+      <input type="range" id="maxprice" oninput="apply()" />
+      <div class="pricewrap"><span id="pmin"></span><span id="pmax"></span></div>
+    </div>
+    <button class="clear" onclick="clearFilters()">Clear filters (restore full catalog · AC-4)</button>
+  </aside>
+  <main>
+    <div class="summary" id="summary"></div>
+    <div id="results"></div>
+  </main>
+</div>
+
+<script>
+  // Mock GET /api/filters response
+  const FILTERS = {
+    brands: ["Nike","Adidas","Puma"],
+    categories: ["Shoes","Clothing","Accessories","Sportswear","Bags"],
+    genders: ["Men","Women","Unisex","Kids"],
+    colors: ["Red","Black","Blue","White"],
+    price_range: { min: 199.00, max: 14999.00 }
+  };
+  // Mock catalog (filtered client-side to emulate GET /api/products?params)
+  const PRODUCTS = [
+    { product_id:"P1001", name:"Nike Revolution 6", brand:"Nike", category:"Shoes", gender:"Men", color:"Red", price:2799.00, stock:12, in_stock:true },
+    { product_id:"P1002", name:"Adidas Ultraboost Light", brand:"Adidas", category:"Shoes", gender:"Women", color:"White", price:8999.00, stock:4, in_stock:true },
+    { product_id:"P1003", name:"Puma Essentials Tee", brand:"Puma", category:"Clothing", gender:"Unisex", color:"Black", price:799.00, stock:0, in_stock:false },
+    { product_id:"P1004", name:"Nike Brasilia Duffel", brand:"Nike", category:"Bags", gender:"Unisex", color:"Blue", price:1999.00, stock:23, in_stock:true },
+    { product_id:"P1005", name:"Adidas Running Cap", brand:"Adidas", category:"Accessories", gender:"Unisex", color:"Black", price:599.00, stock:7, in_stock:true }
+  ];
+
+  function inr(n){ return "₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function fill(id, vals){ const s=document.getElementById(id); s.innerHTML = `<option value="">Any</option>` + vals.map(v=>`<option>${v}</option>`).join(""); }
+
+  function init(){
+    fill("brand", FILTERS.brands); fill("category", FILTERS.categories);
+    fill("gender", FILTERS.genders); fill("color", FILTERS.colors);
+    const r = document.getElementById("maxprice");
+    r.min = FILTERS.price_range.min; r.max = FILTERS.price_range.max; r.value = FILTERS.price_range.max;
+    document.getElementById("pmin").textContent = inr(FILTERS.price_range.min);
+    apply();
+  }
+
+  function currentParams(){
+    return {
+      brand: document.getElementById("brand").value,
+      category: document.getElementById("category").value,
+      gender: document.getElementById("gender").value,
+      color: document.getElementById("color").value,
+      min_price: FILTERS.price_range.min,
+      max_price: Number(document.getElementById("maxprice").value)
+    };
+  }
+
+  function apply(){
+    const p = currentParams();
+    document.getElementById("pmax").textContent = inr(p.max_price);
+    const q = Object.entries(p).filter(([k,v])=>v!=="" && v!=null).map(([k,v])=>`${k}=${encodeURIComponent(v)}`).join("&");
+    document.getElementById("summary").textContent = `GET /api/products?${q}`;
+    const matches = PRODUCTS.filter(x =>
+      (!p.brand || x.brand===p.brand) &&
+      (!p.category || x.category===p.category) &&
+      (!p.gender || x.gender===p.gender) &&
+      (!p.color || x.color===p.color) &&
+      x.price >= p.min_price && x.price <= p.max_price
+    );
+    const res = document.getElementById("results");
+    if (matches.length === 0){
+      res.innerHTML = `<div class="empty"><h2>No products match these filters.</h2><p>HTTP 200 with empty list — try clearing some filters.</p></div>`;
+      return;
+    }
+    res.innerHTML = `<div class="grid">${matches.map(x=>`
+      <div class="card">
+        <div class="name">${x.name}</div>
+        <div class="meta">${x.brand} · ${x.category} · ${x.gender} · ${x.color}</div>
+        <div class="price">${inr(x.price)}</div>
+        ${x.in_stock?`<span class="badge in">In stock (${x.stock})</span>`:`<span class="badge out">Out of stock</span>`}
+      </div>`).join("")}</div>`;
+  }
+
+  function clearFilters(){
+    ["brand","category","gender","color"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("maxprice").value = FILTERS.price_range.max;
+    apply();
+  }
+  init();
+</script>
+</body>
+</html>

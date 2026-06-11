@@ -1,0 +1,1431 @@
+{
+  "project": "ShopAssistantRAG",
+  "generated_from": "docs/BRD.md",
+  "version": "1.0",
+  "features": [
+    {
+      "id": "F001",
+      "category": "functional",
+      "story": "E1-S1",
+      "group": "A",
+      "description": "Product model exposes all BRD fields with correct types",
+      "steps": [
+        "Construct a Product with all BRD fields populated",
+        "Assert product_id, name, description, brand, category, gender, color, price, image_url, stock, tags are accessible",
+        "Assert price is decimal and stock is int and tags is a list"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F002",
+      "category": "functional",
+      "story": "E1-S1",
+      "group": "A",
+      "description": "Category enum is restricted to the five allowed values",
+      "steps": [
+        "Enumerate Category values",
+        "Assert the set equals {Shoes, Clothing, Accessories, Sportswear, Bags}",
+        "Assert assigning an out-of-set value raises a validation error"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F003",
+      "category": "functional",
+      "story": "E1-S1",
+      "group": "A",
+      "description": "Gender enum is restricted to the four allowed values",
+      "steps": [
+        "Enumerate Gender values",
+        "Assert the set equals {Men, Women, Unisex, Kids}"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F004",
+      "category": "functional",
+      "story": "E1-S1",
+      "group": "A",
+      "description": "QueryFilters holds optional brand/color/category/gender/min_price/max_price defaulting to None",
+      "steps": [
+        "Construct QueryFilters with no arguments",
+        "Assert all six fields default to None"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F005",
+      "category": "functional",
+      "story": "E1-S1",
+      "group": "A",
+      "description": "Product missing name, price, or category raises a validation error",
+      "steps": [
+        "Attempt to construct a Product omitting name",
+        "Assert a validation error is raised",
+        "Repeat for missing price and missing category"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F006",
+      "category": "functional",
+      "story": "E1-S1",
+      "group": "A",
+      "description": "Product with stock=0 exposes derived in_stock=False",
+      "steps": [
+        "Construct a valid Product with stock=0",
+        "Assert the product is created without error",
+        "Assert derived in_stock is False"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F007",
+      "category": "functional",
+      "story": "E1-S2",
+      "group": "A",
+      "description": "Settings load all required secrets and connection params from environment",
+      "steps": [
+        "Set all required env vars",
+        "Load settings",
+        "Assert GOOGLE_API_KEY, PINECONE_API_KEY, and all MYSQL_* values are populated"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F008",
+      "category": "functional",
+      "story": "E1-S2",
+      "group": "A",
+      "description": ".env.example lists every required key with placeholder values and .env is gitignored",
+      "steps": [
+        "Open .env.example and assert it contains all required keys",
+        "Assert .gitignore contains an entry matching .env"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F009",
+      "category": "functional",
+      "story": "E1-S2",
+      "group": "A",
+      "description": "Missing required setting raises a clear error naming the key",
+      "steps": [
+        "Unset MYSQL_HOST",
+        "Attempt to load settings",
+        "Assert the raised error message names MYSQL_HOST"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F010",
+      "category": "functional",
+      "story": "E1-S2",
+      "group": "A",
+      "description": "Settings expose typed model/index defaults (index name, embedding model, generation model, dim 768)",
+      "steps": [
+        "Load settings without overriding defaults",
+        "Assert EMBEDDING_MODEL == text-embedding-004 and GENERATION_MODEL == gemini-1.5-flash",
+        "Assert EMBEDDING_DIM == 768 and PINECONE_INDEX_NAME is set"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F011",
+      "category": "functional",
+      "story": "E1-S3",
+      "group": "A",
+      "description": "get_logger returns a structured logger with timestamp, level, name, and message",
+      "steps": [
+        "Call get_logger('test') and emit an info record",
+        "Assert the emitted record contains timestamp, level, logger name, and message fields"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F012",
+      "category": "functional",
+      "story": "E1-S3",
+      "group": "A",
+      "description": "Logger supports a session_id/request_id correlation field and configurable level",
+      "steps": [
+        "Emit a log with session_id context bound",
+        "Assert session_id appears in the record",
+        "Set log level env var to DEBUG and assert debug records are emitted"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F013",
+      "category": "security",
+      "story": "E1-S3",
+      "group": "A",
+      "description": "No log statement emits raw API key values",
+      "steps": [
+        "Scan the codebase for log calls referencing GOOGLE_API_KEY or PINECONE_API_KEY values",
+        "Assert none log the secret values directly"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F014",
+      "category": "functional",
+      "story": "E2-S1",
+      "group": "A",
+      "description": "products table is created with all required columns and NOT NULL constraints",
+      "steps": [
+        "Run the schema init script against a clean MySQL 8 instance",
+        "Describe the products table",
+        "Assert columns product_id, name(NOT NULL), category(NOT NULL), price(NOT NULL), and all other BRD fields exist"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F015",
+      "category": "functional",
+      "story": "E2-S1",
+      "group": "A",
+      "description": "category and gender columns are constrained to BRD enum value sets",
+      "steps": [
+        "Attempt to insert a row with category outside the allowed enum",
+        "Assert the insert is rejected by constraint or application validation"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F016",
+      "category": "functional",
+      "story": "E2-S1",
+      "group": "A",
+      "description": "Schema init script is idempotent and product_id is the primary key",
+      "steps": [
+        "Run the schema init script twice",
+        "Assert the second run does not error and no duplicate table is created",
+        "Insert two rows with the same product_id and assert the second is rejected"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-02T00:00:00Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F017",
+      "category": "functional",
+      "story": "E2-S2",
+      "group": "B",
+      "description": "upsert_product inserts new rows and updates existing rows by product_id",
+      "steps": [
+        "upsert_product with a new product_id and assert it is inserted",
+        "upsert_product again with the same product_id but changed price",
+        "Assert the row is updated, not duplicated"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F018",
+      "category": "functional",
+      "story": "E2-S2",
+      "group": "B",
+      "description": "get_products_by_ids returns full records preserving input ordering",
+      "steps": [
+        "Seed three products",
+        "Call get_products_by_ids with IDs in a specific order",
+        "Assert returned products match that order"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F019",
+      "category": "functional",
+      "story": "E2-S2",
+      "group": "B",
+      "description": "list_products applies filters and returns all when no filters supplied",
+      "steps": [
+        "Call list_products with brand=Nike and assert only Nike products return",
+        "Call list_products with no filters and assert all products return"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F020",
+      "category": "functional",
+      "story": "E2-S2",
+      "group": "B",
+      "description": "get_products_by_ids with empty list returns empty without querying DB",
+      "steps": [
+        "Call get_products_by_ids with an empty list",
+        "Assert an empty list is returned and no SQL query is issued"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F021",
+      "category": "integration",
+      "story": "E2-S2",
+      "group": "B",
+      "description": "MySQL connection failure raises a typed repository error not a raw driver exception",
+      "steps": [
+        "Point the repository at an unreachable MySQL host",
+        "Invoke a repository method",
+        "Assert a typed repository error is raised rather than a raw driver exception"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F022",
+      "category": "functional",
+      "story": "E2-S3",
+      "group": "B",
+      "description": "Valid CSV row parses into a Product object",
+      "steps": [
+        "Provide a CSV row with all required fields",
+        "Run the loader",
+        "Assert a Product object is produced with matching values"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F023",
+      "category": "functional",
+      "story": "E2-S3",
+      "group": "B",
+      "description": "Row missing a required field is skipped and recorded as a validation failure",
+      "steps": [
+        "Provide a CSV row missing price",
+        "Run the loader",
+        "Assert the row is not in valid products and is recorded with row id and reason"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F024",
+      "category": "functional",
+      "story": "E2-S3",
+      "group": "B",
+      "description": "Row with out-of-enum category or gender is skipped and recorded",
+      "steps": [
+        "Provide a CSV row with category=Laptops",
+        "Run the loader",
+        "Assert the row is skipped and recorded as a validation failure"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F025",
+      "category": "functional",
+      "story": "E2-S3",
+      "group": "B",
+      "description": "tags string is parsed into a list of trimmed strings and loader returns valid+failures",
+      "steps": [
+        "Provide a row with tags 'Running, Sports , Casual'",
+        "Run the loader and assert tags == ['Running','Sports','Casual']",
+        "Assert loader returns both a valid-products list and a failures list"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F026",
+      "category": "functional",
+      "story": "E3-S1",
+      "group": "B",
+      "description": "build_embedding_text concatenates semantic fields and excludes price/stock/image",
+      "steps": [
+        "Call build_embedding_text on a product",
+        "Assert output contains name, description, brand, category, gender, color, tags",
+        "Assert output contains no price, stock, or image URL"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F027",
+      "category": "functional",
+      "story": "E3-S1",
+      "group": "B",
+      "description": "Missing optional fields are omitted without literal None text and example reads coherently",
+      "steps": [
+        "Call build_embedding_text on a product with no color and no tags",
+        "Assert the word 'None' does not appear in the output",
+        "Run on the BRD example and assert it contains Nike, running shoes, men, Shoes, and tags"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F028",
+      "category": "integration",
+      "story": "E3-S2",
+      "group": "B",
+      "description": "embed_text returns a 768-dim vector using text-embedding-004",
+      "steps": [
+        "Call embed_text on a sample string with the embedding client (mock returns 768 floats)",
+        "Assert the returned vector length is exactly 768",
+        "Assert the configured model is text-embedding-004"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F029",
+      "category": "integration",
+      "story": "E3-S2",
+      "group": "B",
+      "description": "embed_batch returns one ordered 768-dim vector per input text",
+      "steps": [
+        "Call embed_batch with three texts",
+        "Assert three vectors returned in input order, each length 768"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F030",
+      "category": "integration",
+      "story": "E3-S2",
+      "group": "B",
+      "description": "Gemini embedding error is re-raised as a typed embedding error and client uses settings",
+      "steps": [
+        "Force the embedding backend to raise an SDK error",
+        "Assert a typed embedding error is raised, not the raw SDK exception",
+        "Assert the client reads API key and model from centralized settings"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F031",
+      "category": "integration",
+      "story": "E4-S1",
+      "group": "B",
+      "description": "Pinecone client connects using settings and reuses an existing index",
+      "steps": [
+        "Initialize the Pinecone client with a configured (existing) index",
+        "Assert connection uses PINECONE_API_KEY from settings",
+        "Assert the existing index is reused without error"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F032",
+      "category": "integration",
+      "story": "E4-S1",
+      "group": "B",
+      "description": "Missing index is created with dimension 768 and cosine metric; wrong dim is flagged",
+      "steps": [
+        "Initialize with a non-existent index name",
+        "Assert it is created with dimension 768 and cosine metric",
+        "Attempt creation with dimension != 768 and assert it is flagged as a config mismatch"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F033",
+      "category": "integration",
+      "story": "E4-S1",
+      "group": "B",
+      "description": "Pinecone connection failure raises a typed retrieval error",
+      "steps": [
+        "Force a Pinecone connection failure",
+        "Assert a typed retrieval error is raised that maps to the BRD user message"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F034",
+      "category": "integration",
+      "story": "E4-S2",
+      "group": "C",
+      "description": "upsert_products writes one vector per product keyed by product_id with metadata",
+      "steps": [
+        "Call upsert_products with products and matching vectors (mock Pinecone)",
+        "Assert one vector per product keyed by product_id",
+        "Assert each vector carries brand, color, category, gender, price metadata"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-11T14:11:14Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F035",
+      "category": "integration",
+      "story": "E4-S2",
+      "group": "C",
+      "description": "Re-upserting same product_id overwrites prior vector and stores price as numeric",
+      "steps": [
+        "Upsert a product then upsert again with the same id and different metadata",
+        "Assert no duplicate vector exists and metadata is overwritten",
+        "Assert price metadata is numeric so range filters apply"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-11T14:11:14Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F036",
+      "category": "performance",
+      "story": "E4-S2",
+      "group": "C",
+      "description": "Upsert is batched so 500-1000 products load in one run within request limits",
+      "steps": [
+        "Upsert 1000 products via upsert_products",
+        "Assert requests are batched (multiple bounded batches, not one oversized request)",
+        "Assert all 1000 vectors are present afterward"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-11T14:11:14Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F037",
+      "category": "integration",
+      "story": "E3-S3",
+      "group": "C",
+      "description": "Ingestion script runs CSV end-to-end into MySQL and Pinecone",
+      "steps": [
+        "Run the ingestion script on a sample CSV (mocked Gemini/Pinecone)",
+        "Assert valid rows are upserted into MySQL",
+        "Assert corresponding vectors are upserted into Pinecone"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-11T14:11:14Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F038",
+      "category": "functional",
+      "story": "E3-S3",
+      "group": "C",
+      "description": "CSV-validation failures and embedding failures are non-fatal and counted",
+      "steps": [
+        "Include one invalid CSV row and one product whose embedding call fails",
+        "Run ingestion and assert the run completes without aborting",
+        "Assert both failures are counted and the failed product is excluded from Pinecone"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-11T14:11:14Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F039",
+      "category": "functional",
+      "story": "E3-S3",
+      "group": "C",
+      "description": "Ingestion prints a summary with processed/successful/failed counts and reasons; rerun upserts",
+      "steps": [
+        "Run ingestion and assert a summary prints total processed, successful, failed, and failure reasons",
+        "Re-run on the same CSV and assert records are updated, not duplicated, in MySQL and Pinecone"
+      ],
+      "passes": true,
+      "last_evaluated": "2026-06-11T14:11:14Z",
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F040",
+      "category": "functional",
+      "story": "E5-S1",
+      "group": "D",
+      "description": "Filter extraction maps a full NL query to correct structured filters",
+      "steps": [
+        "Extract filters from 'Show me red Nike shoes under 3000' (mock Gemini JSON)",
+        "Assert result equals {brand: Nike, color: Red, category: Shoes, max_price: 3000}"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F041",
+      "category": "functional",
+      "story": "E5-S1",
+      "group": "D",
+      "description": "Synonyms normalize to canonical enums (Crimson->Red, Trainers->Shoes)",
+      "steps": [
+        "Extract filters from a query using 'Crimson' and 'Trainers'",
+        "Assert color normalizes to Red and category normalizes to Shoes"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F042",
+      "category": "functional",
+      "story": "E5-S1",
+      "group": "D",
+      "description": "Unknown enum values are dropped to None and price-only queries extract max_price",
+      "steps": [
+        "Extract from a query naming an unknown color and assert that field is None",
+        "Extract from 'under 500' and assert max_price=500 with all other filters None"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F043",
+      "category": "functional",
+      "story": "E5-S1",
+      "group": "D",
+      "description": "Malformed/non-JSON model output yields empty QueryFilters without crashing",
+      "steps": [
+        "Force the model to return non-JSON text",
+        "Run extraction",
+        "Assert an empty QueryFilters (all None) is returned and no exception propagates"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F044",
+      "category": "functional",
+      "story": "E5-S2",
+      "group": "D",
+      "description": "Hybrid retriever applies brand/color/category/gender as Pinecone equality filters",
+      "steps": [
+        "Call retrieve with filters brand=Nike, category=Shoes (mock Pinecone)",
+        "Assert the Pinecone query includes equality metadata filters for those fields"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F045",
+      "category": "functional",
+      "story": "E5-S2",
+      "group": "D",
+      "description": "min_price/max_price applied as numeric range filters and results ordered by similarity",
+      "steps": [
+        "Call retrieve with max_price=3000",
+        "Assert a numeric range filter on price metadata is sent to Pinecone",
+        "Assert returned results are ordered by similarity score"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F046",
+      "category": "functional",
+      "story": "E5-S2",
+      "group": "D",
+      "description": "Retriever returns at most 5 IDs and empty list when filters exclude all vectors",
+      "steps": [
+        "Call retrieve against a populated mock and assert at most 5 IDs returned",
+        "Call retrieve with filters matching nothing and assert an empty list with no error"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F047",
+      "category": "functional",
+      "story": "E5-S3",
+      "group": "D",
+      "description": "Hydration returns full Product objects for retrieved IDs preserving rank order",
+      "steps": [
+        "Hydrate a ranked ID list [id3, id1, id2]",
+        "Assert full Product objects are returned in that exact order"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F048",
+      "category": "functional",
+      "story": "E5-S3",
+      "group": "D",
+      "description": "ID missing in MySQL is skipped and logged; empty ID list returns empty without query",
+      "steps": [
+        "Hydrate a list containing one ID not present in MySQL and assert it is skipped and logged",
+        "Hydrate an empty list and assert empty result with no MySQL query issued"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F049",
+      "category": "functional",
+      "story": "E6-S1",
+      "group": "E",
+      "description": "Each session has isolated accumulating filters and turn history",
+      "steps": [
+        "Create session A and session B",
+        "Update filters in session A",
+        "Assert session B filters are unchanged"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F050",
+      "category": "functional",
+      "story": "E6-S1",
+      "group": "E",
+      "description": "Session state can be reset to empty filters",
+      "steps": [
+        "Set filters on a session",
+        "Call reset",
+        "Assert the session filters are all None"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F051",
+      "category": "functional",
+      "story": "E6-S1",
+      "group": "E",
+      "description": "Session state is in-memory only and history is bounded",
+      "steps": [
+        "Add more than N turns to a session and assert history is capped at the bound",
+        "Assert no cross-session persistence store is written (memory only)"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F052",
+      "category": "functional",
+      "story": "E6-S2",
+      "group": "E",
+      "description": "Generation prompt includes only retrieved products as context",
+      "steps": [
+        "Invoke generation with two retrieved products (mock Gemini)",
+        "Inspect the assembled prompt",
+        "Assert it contains only those two products as context"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F053",
+      "category": "functional",
+      "story": "E6-S2",
+      "group": "E",
+      "description": "Generated answer references only products present in context (grounding)",
+      "steps": [
+        "Generate with a known product set",
+        "Assert no product name absent from the context appears in the reply"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F054",
+      "category": "functional",
+      "story": "E6-S2",
+      "group": "E",
+      "description": "Empty context yields a no-match message suggesting categories, using gemini-1.5-flash",
+      "steps": [
+        "Invoke generation with empty context",
+        "Assert the reply is a friendly no-match suggesting available categories and invents no product",
+        "Assert the configured generation model is gemini-1.5-flash"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F055",
+      "category": "integration",
+      "story": "E6-S2",
+      "group": "E",
+      "description": "Gemini generation failure returns the BRD user-facing message, not a stack trace",
+      "steps": [
+        "Force a Gemini generation failure",
+        "Assert the response is 'The AI assistant is temporarily unavailable...' with no stack trace"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F056",
+      "category": "functional",
+      "story": "E6-S3",
+      "group": "E",
+      "description": "Refinement merges onto session filters and rebuilds a fresh hybrid retrieval",
+      "steps": [
+        "Turn 1: 'Show me Nike shoes'; Turn 2: 'only red ones'",
+        "Assert turn 2 filters include brand=Nike, category=Shoes, color=Red",
+        "Assert a fresh retrieval is run rather than filtering the prior result list"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F057",
+      "category": "functional",
+      "story": "E6-S3",
+      "group": "E",
+      "description": "'Cheaper options' lowers the upper price ceiling and re-runs retrieval",
+      "steps": [
+        "Establish a session with a max_price",
+        "Send 'cheaper options'",
+        "Assert max_price is reduced and retrieval is re-run for lower-priced items"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F058",
+      "category": "functional",
+      "story": "E6-S3",
+      "group": "E",
+      "description": "Category change or explicit reset clears accumulated filter state",
+      "steps": [
+        "Build up filters then send 'Now show me bags'",
+        "Assert prior brand/color filters are cleared and category becomes Bags",
+        "Send 'forget previous search' and assert all filters reset"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F059",
+      "category": "functional",
+      "story": "E6-S3",
+      "group": "E",
+      "description": "Empty result set yields no-match message with category suggestions and zero cards",
+      "steps": [
+        "Query for something with no catalog matches",
+        "Assert the reply is a friendly no-match with category suggestions",
+        "Assert zero product cards are returned"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F060",
+      "category": "functional",
+      "story": "E6-S3",
+      "group": "E",
+      "description": "Greetings/invalid queries return scoped response without retrieving products",
+      "steps": [
+        "Send 'hi' and assert a scoped capability response with no retrieval",
+        "Send 'asdfgh' and assert a clarification response with no products"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F061",
+      "category": "functional",
+      "story": "E6-S3",
+      "group": "E",
+      "description": "Each chat turn returns an NL message plus up to 5 grounded product cards",
+      "steps": [
+        "Send a normal product query",
+        "Assert the response contains an NL message and at most 5 grounded product cards"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F062",
+      "category": "integration",
+      "story": "E7-S1",
+      "group": "F",
+      "description": "GET /api/health returns 200 with a JSON status body",
+      "steps": [
+        "Call GET /api/health",
+        "Assert status 200 and a JSON body containing a status field"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F063",
+      "category": "integration",
+      "story": "E7-S1",
+      "group": "F",
+      "description": "CORS allows the Streamlit frontend origin",
+      "steps": [
+        "Send a preflight/CORS request from the Streamlit origin",
+        "Assert the response permits that origin"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F064",
+      "category": "security",
+      "story": "E7-S1",
+      "group": "F",
+      "description": "Unhandled exceptions and service errors return structured JSON with no stack trace, mapped to BRD messages",
+      "steps": [
+        "Trigger an unhandled error in a route and assert a structured JSON error with appropriate status and no stack trace",
+        "Trigger a Gemini/Pinecone/MySQL typed error and assert the response is the corresponding BRD user message"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F065",
+      "category": "functional",
+      "story": "E7-S1",
+      "group": "F",
+      "description": "Each request is logged with method, path, and status without secrets",
+      "steps": [
+        "Make a request and inspect logs",
+        "Assert method, path, and status are logged and no secret values appear"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F066",
+      "category": "integration",
+      "story": "E7-S2",
+      "group": "F",
+      "description": "POST /api/chat accepts {session_id, message} and returns reply plus <=5 products",
+      "steps": [
+        "POST /api/chat with a valid session_id and message",
+        "Assert 200 with body containing reply (string) and products (<=5 items)"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F067",
+      "category": "functional",
+      "story": "E7-S2",
+      "group": "F",
+      "description": "Different session_id values maintain independent conversation state",
+      "steps": [
+        "Send refining turns under session_id A",
+        "Send a fresh query under session_id B",
+        "Assert B's results are unaffected by A's accumulated filters"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F068",
+      "category": "integration",
+      "story": "E7-S2",
+      "group": "F",
+      "description": "Missing/empty message returns 422 and service failure returns mapped BRD message",
+      "steps": [
+        "POST /api/chat with empty message and assert 422 validation error",
+        "Force a downstream service failure and assert the mapped BRD user message with a non-leaking error shape"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F069",
+      "category": "performance",
+      "story": "E7-S2",
+      "group": "F",
+      "description": "Typical chat query responds in under 5 seconds",
+      "steps": [
+        "POST /api/chat with a typical query against a seeded catalog",
+        "Measure round-trip latency",
+        "Assert response time is under 5 seconds"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F070",
+      "category": "integration",
+      "story": "E7-S3",
+      "group": "F",
+      "description": "GET /api/products returns catalog with display fields and stock status",
+      "steps": [
+        "Call GET /api/products with no filters",
+        "Assert a list of products each with image, name, brand, category, price, and stock status"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F071",
+      "category": "integration",
+      "story": "E7-S3",
+      "group": "F",
+      "description": "GET /api/products applies structured filter query params",
+      "steps": [
+        "Call GET /api/products?brand=Nike&category=Shoes&max_price=3000",
+        "Assert only matching products are returned"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F072",
+      "category": "integration",
+      "story": "E7-S3",
+      "group": "F",
+      "description": "GET /api/filters returns distinct option values for UI controls",
+      "steps": [
+        "Call GET /api/filters",
+        "Assert distinct brands, categories, genders, and colors are returned"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F073",
+      "category": "integration",
+      "story": "E7-S3",
+      "group": "F",
+      "description": "No-match filter returns empty list with 200 and stock status reflects stock=0",
+      "steps": [
+        "Call GET /api/products with a filter matching nothing and assert 200 with empty list",
+        "Assert a product with stock=0 is surfaced as out of stock"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F074",
+      "category": "ui",
+      "story": "E8-S1",
+      "group": "G",
+      "description": "Catalog grid renders product cards fetched from /api/products",
+      "steps": [
+        "Load the Streamlit app",
+        "Assert it fetches GET /api/products and renders a grid of cards"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F075",
+      "category": "ui",
+      "story": "E8-S1",
+      "group": "G",
+      "description": "Each card shows image, name, brand, category, price, and stock status",
+      "steps": [
+        "Inspect a rendered card",
+        "Assert image, name, brand, category, price (INR), and stock status are visible",
+        "Assert a stock=0 product shows an out-of-stock indicator"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F076",
+      "category": "ui",
+      "story": "E8-S1",
+      "group": "G",
+      "description": "Catalog endpoint unavailable shows a friendly message not a stack trace",
+      "steps": [
+        "Make the catalog endpoint unavailable",
+        "Load the app and assert a friendly message is shown with no stack trace"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F077",
+      "category": "ui",
+      "story": "E8-S2",
+      "group": "G",
+      "description": "Filter controls render and are populated from /api/filters",
+      "steps": [
+        "Load the app",
+        "Assert Brand, Category, Gender, Color controls and a Price Range slider are rendered with options from GET /api/filters"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F078",
+      "category": "ui",
+      "story": "E8-S2",
+      "group": "G",
+      "description": "Selecting filters re-queries products and combined filters intersect; clearing restores full grid",
+      "steps": [
+        "Select Brand=Nike and Category=Shoes and assert the grid shows only products matching both",
+        "Clear filters and assert the full catalog grid is restored"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F079",
+      "category": "ui",
+      "story": "E8-S3",
+      "group": "G",
+      "description": "Chat input submits NL query and displays the assistant reply with up to 5 cards",
+      "steps": [
+        "Type a natural-language query and submit",
+        "Assert the assistant NL reply is displayed",
+        "Assert up to 5 product cards render inline with the reply"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F080",
+      "category": "ui",
+      "story": "E8-S3",
+      "group": "G",
+      "description": "A stable session_id is generated per browser session and sent on every chat call",
+      "steps": [
+        "Open a session and send two messages",
+        "Assert both POST /api/chat calls carry the same session_id"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F081",
+      "category": "ui",
+      "story": "E8-S3",
+      "group": "G",
+      "description": "Multi-turn refinement updates results and transcript persists; no-match shows zero cards",
+      "steps": [
+        "Send a query then a refinement 'only red ones' and assert results update within the same session",
+        "Assert previous turns remain visible in the transcript",
+        "Send a no-match query and assert the friendly message with zero cards"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F082",
+      "category": "functional",
+      "story": "E9-S1",
+      "group": "H",
+      "description": "Unit tests cover filter normalization and price-only extraction with mocks",
+      "steps": [
+        "Run the filter-extraction unit tests",
+        "Assert Crimson->Red and Trainers->Shoes cases pass with mocked Gemini",
+        "Assert price-only extraction test passes"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F083",
+      "category": "functional",
+      "story": "E9-S1",
+      "group": "H",
+      "description": "Unit tests cover hybrid retrieval filters/limit and hydration ordering",
+      "steps": [
+        "Run retrieval unit tests and assert metadata + range filters passed to mock Pinecone with <=5 IDs",
+        "Run hydration unit tests and assert rank order preserved and missing IDs skipped"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F084",
+      "category": "functional",
+      "story": "E9-S1",
+      "group": "H",
+      "description": "Unit tests cover multi-turn accumulation and reset, with no live services",
+      "steps": [
+        "Run multi-turn unit tests asserting refinement accumulates and category change resets",
+        "Assert the entire suite runs and passes with no live Gemini/Pinecone/MySQL connection"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F085",
+      "category": "integration",
+      "story": "E9-S2",
+      "group": "H",
+      "description": "Integration test of /api/chat returns reply and <=5 products on seeded catalog",
+      "steps": [
+        "Seed a test catalog and call POST /api/chat",
+        "Assert 200 with a reply and at most 5 products"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F086",
+      "category": "integration",
+      "story": "E9-S2",
+      "group": "H",
+      "description": "Integration tests cover product filtering and multi-turn refinement",
+      "steps": [
+        "Call GET /api/products with filters and assert correct filtered results",
+        "Run a multi-turn chat sequence and assert 'only red ones' changes results within one session"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F087",
+      "category": "integration",
+      "story": "E9-S2",
+      "group": "H",
+      "description": "No-match integration test and core journey complete with no blocking errors",
+      "steps": [
+        "Issue a no-match chat query and assert a graceful response with zero products",
+        "Run the full core journey (browse -> query -> refine -> no-match) and assert no blocking errors"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F088",
+      "category": "integration",
+      "story": "E10-S1",
+      "group": "H",
+      "description": "Backend and frontend Dockerfiles build and compose defines backend/frontend/mysql",
+      "steps": [
+        "Build the backend and frontend images",
+        "Assert docker-compose.yml defines backend, frontend, and mysql services on a shared network"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F089",
+      "category": "integration",
+      "story": "E10-S1",
+      "group": "H",
+      "description": "docker-compose up brings the stack online with frontend->backend->mysql connectivity",
+      "steps": [
+        "Run docker-compose up",
+        "Assert the Streamlit UI reaches the backend and the backend reaches MySQL"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F090",
+      "category": "security",
+      "story": "E10-S1",
+      "group": "H",
+      "description": "MySQL data persists via named volume and secrets are injected via env not baked into images",
+      "steps": [
+        "Restart the mysql container and assert seeded data persists via the named volume",
+        "Inspect the built images and assert no secrets are baked in (injected via env/.env)"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F091",
+      "category": "integration",
+      "story": "E10-S2",
+      "group": "H",
+      "description": "Schema initializes on first boot and init script bootstraps env and ingestion",
+      "steps": [
+        "Start the stack on a clean volume and assert the products schema is created automatically",
+        "Run init.sh and assert it copies .env.example to .env if absent and runs ingestion"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    },
+    {
+      "id": "F092",
+      "category": "functional",
+      "story": "E10-S2",
+      "group": "H",
+      "description": "README documents dev and Docker run paths and a clean checkout yields a working app",
+      "steps": [
+        "Assert README documents both dev mode (uvicorn + streamlit + local MySQL) and Docker mode",
+        "Follow the README from a clean checkout and assert the app is reachable in the browser"
+      ],
+      "passes": false,
+      "last_evaluated": null,
+      "failure_reason": null,
+      "failure_layer": null
+    }
+  ]
+}

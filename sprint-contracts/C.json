@@ -1,0 +1,44 @@
+{
+  "group": "C",
+  "stories": [
+    "E3-S3",
+    "E4-S2"
+  ],
+  "features": [
+    "F034",
+    "F035",
+    "F036",
+    "F037",
+    "F038",
+    "F039"
+  ],
+  "contract": {
+    "architecture_checks": {
+      "layering": {
+        "required": true,
+        "description": "One-way imports across layers per specs/design/system-design.md."
+      },
+      "typing": {
+        "required": true,
+        "description": "All functions type-annotated; mypy clean per code-gen principles."
+      },
+      "folder_structure": {
+        "required": true,
+        "description": "Files match specs/design/component-map.md for this group."
+      },
+      "env_vars": {
+        "required": false,
+        "description": "Secrets/config via .env only; no hardcoded secrets (BRD NFR-3)."
+      },
+      "migrations": {
+        "required": false,
+        "description": "MySQL schema provisioned idempotently via sql/schema.sql."
+      },
+      "files_must_exist": [
+        "backend/services/ingestion.py",
+        "scripts/ingest.py",
+        "backend/repositories/pinecone_client.py"
+      ]
+    }
+  }
+}

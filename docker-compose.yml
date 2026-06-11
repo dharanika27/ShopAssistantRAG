@@ -1,0 +1,86 @@
+# ShopAssistantRAG Docker stack (E10-S1, E10-S2).
+#
+# Three containers on one network: the FastAPI backend, the Streamlit frontend,
+# and MySQL. Gemini (embeddings), Groq (generation), and Pinecone stay external
+# cloud services reached over the internet. All secrets are injected from the
+# host .env file (AC-5) -- nothing is baked into an image. MySQL data persists
+# in a named volume (E10-S1 AC-4).
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # First-boot schema initialization (E10-S2 AC-1): MySQL runs every *.sql in
+      # this directory once, on an empty data volume.
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - shopnet
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    environment:
+      # Gemini (embeddings) + Groq (generation) + Pinecone are external services.
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      PINECONE_API_KEY: ${PINECONE_API_KEY}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      LLM_PROVIDER: ${LLM_PROVIDER:-groq}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      GENERATION_MODEL: ${GENERATION_MODEL:-gemini-1.5-flash}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-gemini-embedding-2}
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-768}
+      PINECONE_INDEX_NAME: ${PINECONE_INDEX_NAME:-shop-products}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8501}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      # Mount the catalog CSV (read-only) so the ingestion pipeline can read it
+      # without baking data into the image:
+      #   docker compose exec backend python -m scripts.ingest
+      - ./data:/app/data:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - shopnet
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    environment:
+      # The UI reaches the backend over the shared network by service name (AC-3).
+      BACKEND_URL: http://backend:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    networks:
+      - shopnet
+
+networks:
+  shopnet:
+    driver: bridge
+
+volumes:
+  mysql_data:

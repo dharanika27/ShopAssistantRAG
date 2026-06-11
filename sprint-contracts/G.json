@@ -1,0 +1,124 @@
+{
+  "group": "G",
+  "stories": [
+    "E8-S1",
+    "E8-S2",
+    "E8-S3"
+  ],
+  "features": [
+    "F074",
+    "F075",
+    "F076",
+    "F077",
+    "F078",
+    "F079",
+    "F080",
+    "F081"
+  ],
+  "contract": {
+    "architecture_checks": {
+      "layering": {
+        "required": true,
+        "description": "One-way imports across layers per specs/design/system-design.md."
+      },
+      "typing": {
+        "required": true,
+        "description": "All functions type-annotated; mypy clean per code-gen principles."
+      },
+      "folder_structure": {
+        "required": true,
+        "description": "Files match specs/design/component-map.md for this group."
+      },
+      "env_vars": {
+        "required": true,
+        "description": "Secrets/config via .env only; no hardcoded secrets (BRD NFR-3)."
+      },
+      "migrations": {
+        "required": false,
+        "description": "MySQL schema provisioned idempotently via sql/schema.sql."
+      },
+      "files_must_exist": [
+        "frontend/app.py",
+        "frontend/components/catalog_grid.py",
+        "frontend/components/product_card.py",
+        "frontend/api_client.py",
+        "frontend/components/filters.py",
+        "frontend/components/chat.py"
+      ]
+    },
+    "playwright_checks": [
+      {
+        "id": "pw-catalog-grid",
+        "description": "Catalog grid renders product cards (E8-S1).",
+        "url": "http://localhost:8501",
+        "steps": [
+          {
+            "action": "navigate",
+            "assertion": "app loaded",
+            "value": "http://localhost:8501"
+          },
+          {
+            "action": "assert_visible",
+            "assertion": "catalog/browse view present",
+            "selector": "getByText('Browse')"
+          },
+          {
+            "action": "assert_visible",
+            "assertion": "product card price field rendered",
+            "selector": "getByText('Price')"
+          }
+        ]
+      },
+      {
+        "id": "pw-filters",
+        "description": "Traditional filter controls present (E8-S2).",
+        "url": "http://localhost:8501",
+        "steps": [
+          {
+            "action": "navigate",
+            "assertion": "app loaded",
+            "value": "http://localhost:8501"
+          },
+          {
+            "action": "assert_visible",
+            "assertion": "brand filter control visible",
+            "selector": "getByText('Brand')"
+          },
+          {
+            "action": "assert_visible",
+            "assertion": "category filter control visible",
+            "selector": "getByText('Category')"
+          }
+        ]
+      },
+      {
+        "id": "pw-chat",
+        "description": "Conversational chat accepts a query and shows a reply (E8-S3).",
+        "url": "http://localhost:8501",
+        "steps": [
+          {
+            "action": "navigate",
+            "assertion": "app loaded",
+            "value": "http://localhost:8501"
+          },
+          {
+            "action": "assert_visible",
+            "assertion": "chat interface present",
+            "selector": "getByText('Chat')"
+          },
+          {
+            "action": "fill",
+            "assertion": "query entered",
+            "selector": "getByRole('textbox')",
+            "value": "Show me red Nike shoes under 3000"
+          },
+          {
+            "action": "assert_visible",
+            "assertion": "assistant reply / product cards rendered",
+            "selector": "getByText('products')"
+          }
+        ]
+      }
+    ]
+  }
+}

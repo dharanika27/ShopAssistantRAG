@@ -1,0 +1,53 @@
+{
+  "group": "E",
+  "stories": [
+    "E6-S1",
+    "E6-S2",
+    "E6-S3"
+  ],
+  "features": [
+    "F049",
+    "F050",
+    "F051",
+    "F052",
+    "F053",
+    "F054",
+    "F055",
+    "F056",
+    "F057",
+    "F058",
+    "F059",
+    "F060",
+    "F061"
+  ],
+  "contract": {
+    "architecture_checks": {
+      "layering": {
+        "required": true,
+        "description": "One-way imports across layers per specs/design/system-design.md."
+      },
+      "typing": {
+        "required": true,
+        "description": "All functions type-annotated; mypy clean per code-gen principles."
+      },
+      "folder_structure": {
+        "required": true,
+        "description": "Files match specs/design/component-map.md for this group."
+      },
+      "env_vars": {
+        "required": false,
+        "description": "Secrets/config via .env only; no hardcoded secrets (BRD NFR-3)."
+      },
+      "migrations": {
+        "required": false,
+        "description": "MySQL schema provisioned idempotently via sql/schema.sql."
+      },
+      "files_must_exist": [
+        "backend/services/query_state.py",
+        "backend/services/answer_generator.py",
+        "backend/prompts/answer_generation.txt",
+        "backend/services/chat_orchestrator.py"
+      ]
+    }
+  }
+}

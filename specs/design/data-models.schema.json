@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://shopassistantrag/specs/design/data-models.schema.json",
+  "title": "ShopAssistantRAG Data Models",
+  "description": "JSON Schema (draft-07) for all data entities. Source: docs/BRD.md v1.0, stories E1-S1/E2-S1/E4-S2/E6-S1/E3-S3.",
+  "definitions": {
+    "Category": {
+      "type": "string",
+      "enum": ["Shoes", "Clothing", "Accessories", "Sportswear", "Bags"]
+    },
+    "Gender": {
+      "type": "string",
+      "enum": ["Men", "Women", "Unisex", "Kids"]
+    },
+    "Product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product_id", "name", "category", "price", "stock", "in_stock"],
+      "properties": {
+        "product_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": ["string", "null"] },
+        "brand": { "type": ["string", "null"] },
+        "category": { "$ref": "#/definitions/Category" },
+        "gender": {
+          "anyOf": [{ "$ref": "#/definitions/Gender" }, { "type": "null" }]
+        },
+        "color": { "type": ["string", "null"] },
+        "price": { "type": "number", "minimum": 0 },
+        "image_url": { "type": ["string", "null"] },
+        "stock": { "type": "integer", "minimum": 0 },
+        "tags": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "in_stock": { "type": "boolean", "description": "Derived: stock > 0" }
+      }
+    },
+    "QueryFilters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "brand": { "type": ["string", "null"], "default": null },
+        "color": { "type": ["string", "null"], "default": null },
+        "category": {
+          "anyOf": [{ "$ref": "#/definitions/Category" }, { "type": "null" }],
+          "default": null
+        },
+        "gender": {
+          "anyOf": [{ "$ref": "#/definitions/Gender" }, { "type": "null" }],
+          "default": null
+        },
+        "min_price": { "type": ["number", "null"], "minimum": 0, "default": null },
+        "max_price": { "type": ["number", "null"], "minimum": 0, "default": null }
+      }
+    },
+    "PineconeVectorRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "values", "metadata"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "values": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 768,
+          "maxItems": 768
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["category", "price"],
+          "properties": {
+            "brand": { "type": "string" },
+            "color": { "type": "string" },
+            "category": { "$ref": "#/definitions/Category" },
+            "gender": { "$ref": "#/definitions/Gender" },
+            "price": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "Turn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "message"],
+      "properties": {
+        "role": { "type": "string", "enum": ["user", "assistant"] },
+        "message": { "type": "string" }
+      }
+    },
+    "SessionState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["session_id", "filters", "history"],
+      "properties": {
+        "session_id": { "type": "string", "minLength": 1 },
+        "filters": { "$ref": "#/definitions/QueryFilters" },
+        "history": { "type": "array", "items": { "$ref": "#/definitions/Turn" } },
+        "last_category": {
+          "anyOf": [{ "$ref": "#/definitions/Category" }, { "type": "null" }],
+          "default": null
+        }
+      }
+    },
+    "FailureRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["row_id", "reason"],
+      "properties": {
+        "row_id": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "IngestionSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_processed", "successful", "failed", "failures"],
+      "properties": {
+        "total_processed": { "type": "integer", "minimum": 0 },
+        "successful": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "failures": { "type": "array", "items": { "$ref": "#/definitions/FailureRecord" } }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "Product": { "$ref": "#/definitions/Product" },
+    "QueryFilters": { "$ref": "#/definitions/QueryFilters" },
+    "PineconeVectorRecord": { "$ref": "#/definitions/PineconeVectorRecord" },
+    "SessionState": { "$ref": "#/definitions/SessionState" },
+    "IngestionSummary": { "$ref": "#/definitions/IngestionSummary" }
+  }
+}
