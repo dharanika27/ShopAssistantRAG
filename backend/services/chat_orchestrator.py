@@ -42,7 +42,14 @@ from backend.services.query_state import QueryStateManager, SessionState, TurnRo
 logger = get_logger(__name__)
 
 MAX_PRODUCT_CARDS = 5
+# Fallback shrink factor used only when no prior results are known and we must
+# lower an existing ``max_price`` ceiling without a cheapest-shown reference.
 _CHEAPER_FACTOR = Decimal("0.8")
+# Smallest price step (one whole rupee). Subtracted from the cheapest product
+# already shown so the new ceiling is an *exclusive* upper bound just under it:
+# already-shown cheapest items are excluded, but genuinely cheaper products
+# priced between the catalog floor and the shown minimum are still admitted.
+_PRICE_EPSILON = Decimal("1")
 
 _GREETING_PHRASES = frozenset(
     {"hi", "hello", "hey", "yo", "hiya", "good morning", "good afternoon",
@@ -243,15 +250,22 @@ def _merge_extracted(state: SessionState, extracted: QueryFilters) -> None:
 
 
 def _lower_price_ceiling(state: SessionState) -> None:
-    """Lower ``max_price`` below the current ceiling / cheapest result (AC-2)."""
-    candidates = [
-        ceiling
-        for ceiling in (state.filters.max_price, state.last_result_min_price)
-        if ceiling is not None
-    ]
-    if not candidates:
-        return
-    state.filters.max_price = min(candidates) * _CHEAPER_FACTOR
+    """Lower ``max_price`` to surface genuinely cheaper alternatives (AC-2).
+
+    When prior results exist, set the new (inclusive) ceiling to just below the
+    cheapest product already shown — ``last_result_min_price - _PRICE_EPSILON`` —
+    so already-shown cheapest items are excluded while still admitting products
+    priced between the catalog floor and the shown minimum. Multiplying by a
+    factor here would push the ceiling far below the cheapest-shown item and
+    often below the catalog floor, returning zero results.
+
+    With no prior results, fall back to shrinking any existing ``max_price``
+    ceiling by ``_CHEAPER_FACTOR``.
+    """
+    if state.last_result_min_price is not None:
+        state.filters.max_price = state.last_result_min_price - _PRICE_EPSILON
+    elif state.filters.max_price is not None:
+        state.filters.max_price = state.filters.max_price * _CHEAPER_FACTOR
 
 
 def _out_of_catalog_term(message: str) -> str | None:

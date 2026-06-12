@@ -173,6 +173,37 @@ class TestCheaperOptions:
         assert cheaper_filters.max_price is not None
         assert cheaper_filters.max_price < Decimal("3000")
 
+    def test_cheaper_admits_products_below_shown_minimum(self) -> None:
+        """Live repro (F057/AC-2): "shoes under 9000" shows a cheapest of 2799;
+        "cheaper" must surface the genuinely lower-priced 2299 shoe while
+        excluding the 2799 already shown — not push the ceiling so low that
+        cheaper-than-shown products are filtered out."""
+        catalog = {
+            "P1": _product("P1", price="2799"),
+            "P2": _product("P2", price="4500"),
+            "P3": _product("P3", price="2299"),
+            "P4": _product("P4", price="2999"),
+        }
+        orchestrator, retriever, _ = _build(
+            extractions=[
+                QueryFilters(category=Category.SHOES, max_price=Decimal("9000")),
+                QueryFilters(),
+            ],
+            # First turn shows the two products under 9000 (cheapest = 2799).
+            id_batches=[["P1", "P2"], ["P3"]],
+            catalog=catalog,
+        )
+
+        orchestrator.handle_turn(_SESSION, "shoes under 9000")
+        orchestrator.handle_turn(_SESSION, "cheaper")
+
+        _, cheaper_filters = retriever.calls[1]
+        assert cheaper_filters.max_price is not None
+        # Excludes the cheapest item already shown (2799)...
+        assert cheaper_filters.max_price < Decimal("2799")
+        # ...but still admits the genuinely cheaper 2299 shoe.
+        assert cheaper_filters.max_price >= Decimal("2299")
+
 
 class TestCategoryChangeReset:
     def test_new_category_resets_accumulated_filters(self) -> None:
