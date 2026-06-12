@@ -18,3 +18,8 @@ venv/
 # OS / editor
 .DS_Store
 *.swp
+
+# Local tooling / diagnostic artifacts (not part of the project)
+.playwright-mcp/
+multiturn-refinement.png
+cls
