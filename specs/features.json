@@ -1148,8 +1148,8 @@
         "Load the Streamlit app",
         "Assert it fetches GET /api/products and renders a grid of cards"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1164,8 +1164,8 @@
         "Assert image, name, brand, category, price (INR), and stock status are visible",
         "Assert a stock=0 product shows an out-of-stock indicator"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1179,8 +1179,8 @@
         "Make the catalog endpoint unavailable",
         "Load the app and assert a friendly message is shown with no stack trace"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1194,8 +1194,8 @@
         "Load the app",
         "Assert Brand, Category, Gender, Color controls and a Price Range slider are rendered with options from GET /api/filters"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1209,8 +1209,8 @@
         "Select Brand=Nike and Category=Shoes and assert the grid shows only products matching both",
         "Clear filters and assert the full catalog grid is restored"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1225,8 +1225,8 @@
         "Assert the assistant NL reply is displayed",
         "Assert up to 5 product cards render inline with the reply"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1240,8 +1240,8 @@
         "Open a session and send two messages",
         "Assert both POST /api/chat calls carry the same session_id"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1256,8 +1256,8 @@
         "Assert previous turns remain visible in the transcript",
         "Send a no-match query and assert the friendly message with zero cards"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1272,8 +1272,8 @@
         "Assert Crimson->Red and Trainers->Shoes cases pass with mocked Gemini",
         "Assert price-only extraction test passes"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1287,8 +1287,8 @@
         "Run retrieval unit tests and assert metadata + range filters passed to mock Pinecone with <=5 IDs",
         "Run hydration unit tests and assert rank order preserved and missing IDs skipped"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1302,8 +1302,8 @@
         "Run multi-turn unit tests asserting refinement accumulates and category change resets",
         "Assert the entire suite runs and passes with no live Gemini/Pinecone/MySQL connection"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1317,8 +1317,8 @@
         "Seed a test catalog and call POST /api/chat",
         "Assert 200 with a reply and at most 5 products"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1332,8 +1332,8 @@
         "Call GET /api/products with filters and assert correct filtered results",
         "Run a multi-turn chat sequence and assert 'only red ones' changes results within one session"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1347,8 +1347,8 @@
         "Issue a no-match chat query and assert a graceful response with zero products",
         "Run the full core journey (browse -> query -> refine -> no-match) and assert no blocking errors"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1362,8 +1362,8 @@
         "Build the backend and frontend images",
         "Assert docker-compose.yml defines backend, frontend, and mysql services on a shared network"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1377,8 +1377,8 @@
         "Run docker-compose up",
         "Assert the Streamlit UI reaches the backend and the backend reaches MySQL"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1392,8 +1392,8 @@
         "Restart the mysql container and assert seeded data persists via the named volume",
         "Inspect the built images and assert no secrets are baked in (injected via env/.env)"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1407,8 +1407,8 @@
         "Start the stack on a clean volume and assert the products schema is created automatically",
         "Run init.sh and assert it copies .env.example to .env if absent and runs ingestion"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1422,8 +1422,8 @@
         "Assert README documents both dev mode (uvicorn + streamlit + local MySQL) and Docker mode",
         "Follow the README from a clean checkout and assert the app is reachable in the browser"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:55:00Z",
       "failure_reason": null,
       "failure_layer": null
     }

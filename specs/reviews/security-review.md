@@ -1,304 +1,204 @@
-# Security Review — ShopAssistantRAG (Story Group A: Foundation Layer) — 2026-06-12
+# Security Review — ShopAssistantRAG (Group H) — 2026-06-12
 
-Scope: stories E1-S1, E1-S2, E1-S3, E2-S1 and features F001-F016. Files reviewed:
-`backend/domain/models.py`, `backend/domain/enums.py`, `backend/core/config.py`,
-`backend/core/logging.py`, `backend/core/errors.py`, `sql/schema.sql`,
-`scripts/init_db.py`, `scripts/ingest.py`, `backend/repositories/db.py`,
-`backend/repositories/product_repository.py`, `.env.example`, `.gitignore`,
-`docker-compose.yml`, `requirements.txt`, `pyproject.toml`, and the foundation
-test files `tests/unit/test_config.py`, `tests/unit/test_db.py`.
+Scope: Group H per `sprint-contracts/H.json` — test suites (unit/integration/e2e),
+Docker/deployment files, dependency manifests, init scripts, README, and the
+backend services the Group H tests exercise (chat_orchestrator, answer_generator,
+hybrid_retriever, filter_extractor, hydrator, query_state) plus the request-path
+collaborators they touch (product_repository, db, config, middleware, main, chat route).
 
 ## Summary
-- BLOCK findings: 0
-- WARN findings: 3
-- INFO findings: 5
-- Overall verdict: WARN (no BLOCK; merge may proceed, address WARN items next sprint)
-
-The foundation layer is solid. All SQL uses parameterized queries, secrets are
-loaded from the environment via `SecretStr` and masked in `repr`, `.env` is
-gitignored and not tracked, `.env.example` contains only placeholders, and no
-unsafe deserialization (`pickle`/`yaml.load`/`eval`/`exec`/shell) is present.
-No BLOCK-level issues found. The WARN items are hardening recommendations that
-do not block the merge.
-
-## BLOCK Findings
-
-None.
-
-## WARN Findings
-
-### [VULN-001] Required secrets accepted as empty strings (incomplete input validation)
-File: backend/core/config.py lines 43-49, 116-124
-Severity: WARN
-Description: `Settings` declares `GOOGLE_API_KEY`, `PINECONE_API_KEY`, and
-`MYSQL_PASSWORD` as `SecretStr` and the host/user/database as `str`. Pydantic's
-"missing" detection only fires when a key is fully absent; an empty string
-(`MYSQL_PASSWORD=`) or whitespace passes validation. `_missing_required_keys`
-only inspects errors of type `"missing"`, so a present-but-empty required secret
-is silently accepted and propagated to the DB driver and SDK clients. This
-weakens the NFR-3 guarantee that all secrets are supplied. The `groq_api_key_value`
-accessor (lines 87-95) does correctly reject an empty value, but the seven core
-required fields do not get the same treatment.
-Fix: Add a `min_length=1` constraint (or a `field_validator`/`model_validator`
-that rejects blank/whitespace-only values after `.strip()`) to the seven required
-fields so an empty required secret raises `ConfigError` naming the key, matching
-the existing missing-key behavior.
-
-### [VULN-002] CORS origins parsed but not validated; misconfiguration can widen exposure
-File: backend/core/config.py lines 56, 64-70
-Severity: WARN
-Description: `ALLOWED_ORIGINS` is a free-form comma-separated string fed directly
-into `allowed_origins_list()` with no validation. A deployment that sets
-`ALLOWED_ORIGINS=*` (or includes an unintended origin) would be accepted verbatim
-and, once consumed by the API CORS middleware (E7-S1), could allow cross-origin
-credentialed requests from arbitrary sites. The foundation layer owns config
-parsing and is the correct place to constrain this value.
-Fix: Validate each parsed origin against a scheme+host allowlist (reject bare `*`
-when credentials are enabled, reject entries without an `http(s)://` scheme). At
-minimum document and assert in the consuming API layer that `*` is never combined
-with credentialed CORS.
-
-### [VULN-003] Verbose driver exception text echoed to stderr by CLI entrypoints
-File: scripts/init_db.py line 28; scripts/ingest.py line 55; backend/repositories/db.py lines 84-86; backend/repositories/product_repository.py line 118
-Severity: WARN
-Description: On failure, `RepositoryError` is constructed with the full underlying
-driver exception text (`f"Failed to initialize MySQL schema on {host}: {exc}"`)
-and the CLI entrypoints `print(...)` that message to stderr. mysql-connector
-exception strings can include host, user, and connection parameters. These are
-CLI/dev tools (not an HTTP surface) and the structured logger deliberately omits
-the password (good), but verbose driver errors echoed to a console can leak
-connection topology into terminal output / CI logs.
-Fix: Keep the wrapped `RepositoryError` message high-level (e.g. "MySQL schema
-init failed; see logs") and log the detailed `exc` only via the structured logger.
-Do not interpolate raw driver exception text into messages printed to stdout/stderr.
-
-## INFO Findings
-
-### [VULN-004] `.env` present on disk but correctly untracked — verified clean
-File: .gitignore lines 1-4; working-tree `.env`
-Severity: INFO
-Description: A local `.env` exists on disk. It is correctly listed in `.gitignore`
-(`.env`, `.env.local`); `git ls-files` shows only `.env.example` is tracked, and
-`git status` / `git diff --cached` show `.env` is neither tracked nor staged. No
-real secret is committed. Informational confirmation, not a defect.
-Fix: No action required. Optionally add a pre-commit secret scanner (gitleaks /
-detect-secrets) to enforce this in CI.
-
-### [VULN-005] `.env.example` contains only placeholders — verified clean
-File: .env.example lines 15-30
-Severity: INFO
-Description: The committed template uses obvious placeholders
-(`your-google-api-key-here`, `your-groq-api-key-here`,
-`your-pinecone-api-key-here`, `MYSQL_PASSWORD=change-me`). No real credential
-present.
-Fix: No action required. The documented default `change-me` must never reach a
-real deployment; a reinforcing comment is optional.
-
-### [VULN-006] Hardcoded test credentials in fixtures (acceptable; not used in prod)
-File: tests/unit/test_config.py lines 12-20; tests/unit/test_db.py lines 19-27
-Severity: INFO
-Description: Test fixtures define literal credentials (`test-google-key`,
-`shop_password`, etc.). Per review policy these were inspected as in-scope: they
-are test-only fixtures, not referenced by any production config path, and the same
-values do not appear in `docker-compose.yml`, `.env.example`, or source modules.
-Fix: No action required. Optionally centralize fixture env in a shared factory.
-
-### [VULN-007] `EMBEDDING_MODEL` default mismatch between code and template (config hygiene)
-File: backend/core/config.py line 52 vs .env.example line 45
-Severity: INFO
-Description: `config.py` defaults `EMBEDDING_MODEL` to `"text-embedding-004"`
-while `.env.example` documents `EMBEDDING_MODEL=gemini-embedding-2`. Not a
-security vulnerability, but an inconsistency that can confuse which model/dimension
-is authoritative (embedding-dimension drift can have downstream correctness impact).
-Fix: Align the code default and the template to a single documented value.
-
-### [VULN-008] MySQL multi-statement execution disabled by design — verified safe
-File: backend/repositories/db.py lines 49-58, 71-74
-Severity: INFO
-Description: `init_schema` splits the schema file into individual statements via
-`split_sql_statements` and calls `cursor.execute(statement)` once per statement
-(no `multi=True`). The schema text is a trusted static asset, not user input, and
-all runtime queries in `product_repository.py` use `%s` placeholders with values
-passed separately. Column names and placeholder counts derive only from hardcoded
-constants. No SQL injection vector in the foundation layer.
-Fix: No action required. If future stories load externally-provided SQL, do not
-reuse this splitter on untrusted input.
-
-## Checks that passed (no finding)
-- SQL injection: not present — all queries parameterized (`product_repository.py`
-  lines 73-75, 92, 106, 137-160; `db.py` 71-74). Dynamic SQL fragments derive only
-  from hardcoded constants.
-- Unsafe deserialization / RCE: none — no `pickle`, `yaml.load`, `eval`, `exec`,
-  `os.system`, `subprocess`, or `shell=True` in scope. `json.loads` in
-  `_parse_tags` consumes DB-origin column data only.
-- Secret masking: `SecretStr` for all secrets; `test_repr_does_not_leak_api_keys`
-  asserts `repr(settings)` hides them. Structured logger only serializes
-  caller-supplied `extra` fields and `connection_params` documents no password
-  logging.
-- Path traversal: `_SCHEMA_PATH` resolved from `__file__` (static). `scripts/ingest.py`
-  takes a CSV path from argv — operator-run CLI, not a network attack surface.
-- Auth/Authz: Group A has no exposed network surface (pure domain/config/logging/DB
-  bootstrap). Nothing to bypass at this layer.
-- Insecure randomness: no `random`/`secrets` usage in scope.
-- Dependencies (requirements.txt): all pinned — fastapi 0.136.3, uvicorn 0.48.0,
-  pydantic 2.12.5, pydantic-settings 2.13.1, python-dotenv 1.2.2, google-genai
-  1.68.0, groq 1.4.0, pinecone 9.0.1, mysql-connector-python 9.1.0. No automated
-  CVE scanner available in this environment; recommend running `pip-audit` in CI.
-
----
-
-# Security Review — ShopAssistantRAG (Story Group B: Backend RAG) — 2026-06-12
-
-## Summary
-- BLOCK findings: 0
-- WARN findings: 4
+- BLOCK findings: 1
+- WARN findings: 6
 - INFO findings: 6
-- Overall verdict: WARN (no BLOCK; merge may proceed, address WARN items before any
-  non-local/public deployment)
-
-Scope reviewed (all files in the Group B contract):
-- backend/repositories/ (product_repository.py, pinecone_client.py, db.py)
-- backend/services/ (csv_loader.py, embedding_text.py, embedding_client.py, answer_generator.py,
-  chat_orchestrator.py, filter_extractor.py, groq_client.py, hybrid_retriever.py, hydrator.py,
-  ingestion.py, llm_provider.py, query_state.py)
-- backend/core/ (errors.py, config.py, logging.py)
-- backend/api/ (main.py, middleware.py, dependencies.py, routes/*.py, schemas.py)
-- backend/domain/ (models.py, enums.py)
-- sql/schema.sql; backend/prompts/*.txt
-- supporting: .env, .env.example, requirements.txt, pyproject.toml
-
-### Positive observations (verified mitigations)
-- SQL is fully parameterized. `product_repository.py` uses `%s` placeholders for all values,
-  builds `IN (...)` placeholders by count (never interpolating values), and whitelists filter
-  column names from a fixed code constant. No SQLi.
-- Secrets load via pydantic `Settings` from env/`.env`, wrapped in `SecretStr`; nothing hardcoded
-  in source. `connection_params` excludes the password from logs.
-- Error middleware maps every typed error to a generic public envelope; no stack trace reaches the
-  client (NFR-3). CORS restricted to configured origins (no wildcard), methods limited to GET/POST.
-- No `eval`/`exec`/`pickle`/`yaml.load`/`os.system`/`subprocess` anywhere in the backend.
-- Every external SDK/driver boundary catches raw exceptions and re-raises typed domain errors.
-- The chat orchestrator's filter extraction validates LLM output against fixed enums and falls back
-  to empty filters on malformed output — a prompt-injection attempt cannot inject SQL or arbitrary
-  structured filters downstream.
+- Overall verdict: BLOCK
 
 ## BLOCK Findings
 
-None.
+### [VULN-001] Live third-party API keys and DB credentials present in workspace `.env`
+File: `.env` lines 7, 8, 16, 19, 35
+Severity: BLOCK
+Description: The working-tree `.env` file contains real, live-format secret values, not
+placeholders: a Google Gemini API key (`GOOGLE_API_KEY=AIza...`), a Pinecone API key
+(`PINECONE_API_KEY=pcsk_...`), a Groq API key (`GROQ_API_KEY=gsk_...`), the MySQL root
+password (`MYSQL_ROOT_PASSWORD=root`), and the application MySQL password
+(`MYSQL_PASSWORD=shoppassword`). These are billable, externally-exploitable credentials.
+Mitigating factor: `.env` IS listed in `.gitignore` (line 3) and `git ls-files` /
+`git log --all -- .env` confirm it is not tracked and was never committed — so the secrets
+have not leaked through git history. However, the secrets are live in the developer
+workspace, are trivially captured by any tool/process with filesystem access, and the keys
+look genuine (real Gemini/Pinecone/Groq prefixes). Treat them as compromised. The fact that
+they were ever written into a real file (rather than the operator filling them in locally
+from `.env.example`) is the exploitable condition.
+Fix:
+1. Immediately rotate/revoke all three API keys (Google AI Studio, Pinecone console, Groq
+   console) and the MySQL passwords, since they must now be assumed exposed.
+2. Replace the values in the local `.env` with the rotated secrets only on the machine that
+   needs them; never distribute a populated `.env`.
+3. Confirm the file stays git-ignored (it is) and add a pre-commit secret scanner (e.g.
+   gitleaks / detect-secrets) to the CI pipeline so a future `git add -f .env` is blocked.
+4. Change the default `MYSQL_ROOT_PASSWORD=root` / weak `shoppassword` to strong,
+   unique values; `root`/`shoppassword` are guessable defaults.
 
 ## WARN Findings
 
-### [VULN-B01] Real live-format API keys present in local `.env`
-File: .env (GOOGLE_API_KEY, PINECONE_API_KEY, GROQ_API_KEY, MYSQL_PASSWORD, MYSQL_ROOT_PASSWORD)
+### [VULN-002] MySQL port published to the host
+File: `docker-compose.yml` lines 17-18
 Severity: WARN
-Description: The on-disk `.env` contains real, live-format credentials — a Google API key
-(`AIzaSy...`, 39 chars), a Pinecone key (`pcsk_...`, 75 chars), a Groq key (`gsk_...`, 56 chars),
-plus MySQL user and root passwords. The file is correctly gitignored and is NOT in git history, so
-it does not leak through the repository. It is flagged because real keys sitting in plaintext on a
-workstation are an exposure risk (backups, screen-shares, accidental copy into a tracked file). Not
-a BLOCK because nothing secret is committed.
-Fix: Confirm these are throwaway/dev keys, not production; rotate any production-grade or shared key.
-Prefer a secret manager or per-developer local injection over a long-lived plaintext `.env`. Add a
-pre-commit secret-scanning hook (gitleaks/detect-secrets) to prevent future accidental commits.
+Description: The MySQL service maps `3307:3306`, exposing the database on the host
+interface. Only the backend (on the `shopnet` bridge network) needs MySQL; publishing the
+port widens the attack surface to anything that can reach the host, and combined with the
+weak default credentials (VULN-001) makes the DB directly reachable.
+Fix: Remove the `ports:` mapping for the `mysql` service so it is reachable only over the
+internal `shopnet` network. If host access is needed for debugging, bind to loopback only
+(`127.0.0.1:3307:3306`) and gate it behind a dev-only compose override.
 
-### [VULN-B02] No authentication / authorization / rate limiting on any API route
-File: backend/api/routes/chat.py line 27; backend/api/routes/catalog.py lines 32, 56; backend/api/main.py lines 78-99
+### [VULN-003] MySQL password passed on the command line in the healthcheck
+File: `docker-compose.yml` line 25
 Severity: WARN
-Description: `POST /api/chat`, `GET /api/products`, and `GET /api/filters` have no auth dependency,
-API key, or rate limiting. CORS is not a server-side access control, so any non-browser client can
-drive `/api/chat`, which fans out to paid Groq (LLM), Gemini (embedding), and Pinecone calls on
-every request. This is an unauthenticated cost-amplification / abuse and rate-limit-exhaustion
-vector. The design documents a single-user demo, so it is WARN rather than BLOCK, but it must not
-ship to a public/production deployment as-is.
-Fix: Before any non-local deployment, add server-side authentication (API key or session token) on
-`/api/chat` and the catalog routes, and add per-client rate limiting/throttling on `/api/chat`. If
-it stays a closed demo, enforce network-level restriction (bind to localhost / private network).
+Description: The healthcheck runs `mysqladmin ping ... -p${MYSQL_PASSWORD}`, embedding the
+password as a command-line argument. Process arguments are visible to any other process in
+the container/host (`/proc/<pid>/cmdline`, `docker inspect`, `ps`), and `mysql` itself warns
+that using `-p<password>` on the CLI is insecure.
+Fix: Use a password-file or env-based approach for the healthcheck, e.g. set `MYSQL_PWD` in
+the check environment, or use `mysqladmin ping -h localhost` without auth (ping does not
+require credentials for a basic liveness check), or a healthcheck script that reads the
+password from a file/secret.
 
-### [VULN-B03] User input concatenated into LLM prompts without delimiting (prompt injection)
-File: backend/services/filter_extractor.py line 108; backend/services/answer_generator.py lines 80-84; backend/prompts/filter_extraction.txt line 26; backend/prompts/answer_generation.txt lines 16-18
+### [VULN-004] Containers run as root (no non-root user)
+File: `docker/backend.Dockerfile` (whole file), `docker/frontend.Dockerfile` (whole file)
 Severity: WARN
-Description: The raw user message is substituted into prompts via plain
-`str.replace("{{QUERY}}", query)` with no escaping or structural delimiting, and product fields
-(name/brand/color) are inlined into the answer-generation context. A crafted message can attempt to
-override the system instructions ("ignore previous instructions..."). Impact is bounded: filter
-extraction validates output against fixed enums and degrades to empty filters, so a jailbreak cannot
-inject SQL or arbitrary filters; answer generation only returns text (no tool/code execution). The
-realistic risk is reputational — coercing off-brand/misleading replies, or laundering injected text
-from poisoned catalog data into a user-facing reply.
-Fix: Wrap user-supplied and catalog-derived content in clearly delimited blocks (e.g. fenced
-`<<<USER_QUERY>>> ... <<<END>>>`) and instruct the model to treat that block strictly as data, never
-instructions. Keep the existing output validation; consider a length/format guard on the reply.
+Description: Neither image creates or switches to a non-root user; the entrypoint/CMD run as
+UID 0. A code-execution or container-escape bug then runs with root privileges inside the
+container, and the bind mounts (`./data`, `./frontend/assets`) plus any future writable
+mounts are accessed as root.
+Fix: In each Dockerfile create a dedicated non-root user and `USER` it before the
+`ENTRYPOINT`/`CMD`, e.g. `RUN useradd --create-home --uid 10001 appuser` then `USER appuser`.
+Ensure `/app` is owned by that user. Consider `read_only: true` plus a tmpfs for scratch dirs
+in compose.
 
-### [VULN-B04] Raw LLM responses logged (untrusted content in logs)
-File: backend/services/filter_extractor.py lines 116, 127, 132; backend/services/answer_generator.py line 98
+### [VULN-005] No request-body size / message length limit on `POST /api/chat`
+File: `backend/api/schemas.py` lines 65-81 (`ChatRequest`); reaches
+`backend/services/chat_orchestrator.py` and `backend/services/filter_extractor.py`
 Severity: WARN
-Description: Raw LLM responses (truncated to 200-1000 chars) are logged at DEBUG and WARNING. These
-echo content derived from untrusted user input and model output. No secret is leaked (verified: the
-logger only serializes caller-supplied `extra` and the DB password is excluded), but echoing raw
-model output at WARNING in production can leak prompt content / user PII into log aggregation and
-inflate logs. Lower severity because it is not a secret leak.
-Fix: Keep raw-response logging at DEBUG only (filter_extractor lines 127/132 currently log
-`raw[:200]` at WARNING), redact/hash the raw content or gate it behind an explicit debug flag, and
-ensure production `LOG_LEVEL` is not DEBUG.
+Description: `ChatRequest.message` and `session_id` enforce only `min_length=1`; there is no
+`max_length`. The unbounded `message` is interpolated into the LLM prompt
+(`filter_extractor.extract`/`answer_generator._build_prompt` via `{{QUERY}}`) and stored in
+per-session history (`query_state.append_turn`). An attacker can submit very large bodies to
+drive token cost / latency (LLM-billing DoS) and grow in-memory session state. `session_id`
+is also unbounded and is the dict key in the in-memory `QueryStateManager`, so a flood of
+distinct long IDs grows memory without bound (no eviction of idle sessions).
+Fix: Add `max_length` constraints to both fields (e.g. `message` ~2000 chars, `session_id`
+~128 chars). Add a global request-body size limit at the ASGI/proxy layer. Bound the number
+of live sessions in `QueryStateManager` (LRU/TTL eviction) so distinct-session floods cannot
+exhaust memory.
+
+### [VULN-006] No rate limiting and no authentication on the API
+File: `backend/api/routes/chat.py` line 27, `backend/api/main.py` lines 78-87
+Severity: WARN
+Description: `POST /api/chat` (and the catalog GETs) have no throttling and no auth. Each chat
+turn fans out to Groq (filter extraction), Gemini (embeddings), Pinecone, and MySQL, so an
+unauthenticated request flood translates directly into external API spend and downstream load.
+Anyone who can reach port 8000 can drive cost.
+Fix: Add per-IP / per-session rate limiting (e.g. `slowapi`, or limits at the reverse proxy)
+on `/api/chat`. Consider requiring an API token or putting the backend behind an authenticated
+gateway before exposing port 8000 beyond localhost.
+
+### [VULN-007] Untrusted user query interpolated directly into LLM prompts (prompt injection)
+File: `backend/services/filter_extractor.py` line 108, `backend/services/answer_generator.py`
+lines 80-84
+Severity: WARN
+Description: The raw user `query` is substituted into the prompt templates via a simple
+`.replace("{{QUERY}}", query)` with no delimiting, escaping, or instruction isolation. A
+crafted message can attempt to override the system instructions (classic prompt injection),
+e.g. coercing the extractor to emit arbitrary JSON or the answer generator to ignore the
+grounding rule and invent products/prices. Impact is bounded by the architecture (extractor
+output is schema-validated and out-of-vocab values are dropped; the generator output is plain
+text shown to the user, not executed), so this is WARN rather than BLOCK — but the grounding
+guarantee (BRD R-3) can still be subverted.
+Fix: Wrap the user input in a clearly delimited block in the template (e.g. fenced
+`<user_query>...</user_query>`) and add a system instruction that content inside the block is
+data, never instructions. Keep the existing schema validation on extractor output. Consider
+output validation on the generator (verify referenced product names exist in the supplied
+context).
 
 ## INFO Findings
 
-### [VULN-B05] `image_url` from CSV stored and returned unvalidated
-File: backend/services/csv_loader.py line 87; backend/domain/models.py line 31; backend/api/schemas.py line 36
+### [VULN-008] Raw LLM response content logged at DEBUG
+File: `backend/services/answer_generator.py` lines 96-99,
+`backend/services/filter_extractor.py` line 116
 Severity: INFO
-Description: `image_url` is accepted as a free-form optional string from the catalog CSV, persisted,
-and returned verbatim in `ProductOut`, never validated as a URL/scheme. A poisoned catalog row could
-carry a `javascript:`/`data:` URL — a stored-XSS vector only if a frontend renders it unsafely
-(out of Group B scope, hence INFO). The backend never fetches this URL, so there is no SSRF.
-Fix: Validate `image_url` against an `http(s)` scheme (pydantic `HttpUrl` or explicit scheme check)
-at the domain/schema boundary; document that the frontend must treat it as untrusted.
+Description: `answer_generator._invoke` logs `raw_content` (first 1000 chars of the model
+reply) and `filter_extractor.extract` logs the raw model output at DEBUG. The prompt embeds
+the user message, so at `LOG_LEVEL=DEBUG` user-supplied content lands in logs. Not a secret
+leak (no credentials), but it is user data in logs and could include PII the user typed.
+Fix: Keep these at DEBUG (default `LOG_LEVEL` is INFO, so off in prod) and document that DEBUG
+must not be enabled in production. Consider truncating further or redacting if logs ship to a
+shared sink.
 
-### [VULN-B06] CSV path is caller-controlled (no traversal sanitization; not currently exposed)
-File: backend/services/csv_loader.py line 45; backend/services/ingestion.py line 103
+### [VULN-009] CORS configured with `allow_credentials=True` and `allow_headers=["*"]`
+File: `backend/api/main.py` lines 90-99
 Severity: INFO
-Description: `load_products_from_csv(csv_path)` opens whatever `Path` it is given. The path comes
-from the operator running the ingestion CLI, not an HTTP request, so this is not a path-traversal
-vulnerability in the current wiring (no web route reaches it). Flagged only so it is not later wired
-to user input without sanitization.
-Fix: If the CSV path is ever exposed via an API or untrusted config, restrict it to an allowlisted
-base directory and reject `..` traversal before opening.
+Description: `allow_credentials=True` is paired with a header wildcard. Origins are correctly
+restricted (no `*` origin — good), so this is not exploitable today. But the API uses no
+cookies/credentials (the frontend is a server-side Streamlit client), so `allow_credentials`
+is unnecessary and `allow_headers=["*"]` is broader than needed.
+Fix: Set `allow_credentials=False` (the API needs no credentialed cross-origin requests) and
+list the specific headers the frontend sends (e.g. `["Content-Type"]`).
 
-### [VULN-B07] CORS `allow_credentials=True` with wildcard headers
-File: backend/api/main.py lines 93-99
+### [VULN-010] No HTTP security response headers
+File: `backend/api/middleware.py` (whole module), `backend/api/main.py` lines 78-99
 Severity: INFO
-Description: CORS allows credentials and `allow_headers=["*"]`. Origins are correctly restricted (no
-wildcard origin), so risk is low, but credentialed requests combined with a wildcard header allowlist
-is broader than needed for an API that uses no cookies/credentials today.
-Fix: Since the API has no auth/cookies yet, set `allow_credentials=False` and enumerate the specific
-headers actually needed (e.g. `Content-Type`).
+Description: Responses carry no `X-Content-Type-Options`, `X-Frame-Options` /
+`Content-Security-Policy`, or `Strict-Transport-Security`. The API returns JSON only and the
+UI is Streamlit (which sets its own headers), so direct risk is low, but defense-in-depth is
+missing on the backend.
+Fix: Add a small middleware (or extend `RequestIdMiddleware`) to set
+`X-Content-Type-Options: nosniff` and, where appropriate, `X-Frame-Options: DENY` on API
+responses. Terminate TLS and add HSTS at the proxy.
 
-### [VULN-B08] Service metadata exposed via health endpoint and startup log
-File: backend/api/routes/health.py lines 14-15, 27-29; backend/api/main.py lines 63-72
+### [VULN-011] Unpinned base image tags
+File: `docker/backend.Dockerfile` line 2, `docker/frontend.Dockerfile` line 2,
+`docker-compose.yml` line 11
 Severity: INFO
-Description: `/api/health` returns service name and version, and startup logs the active LLM provider,
-models, embedding dimension, and Pinecone index name. None is secret, but it is fingerprinting
-metadata. Acceptable for a demo.
-Fix: Optional hardening — omit version from unauthenticated responses in production.
+Description: `python:3.11-slim` and `mysql:8.0` are floating tags — rebuilds can pull a
+changed image, undermining reproducibility and making it hard to know which CVE-patched base
+is deployed. Application Python deps in `requirements.txt`/`frontend-requirements.txt` are
+pinned (good).
+Fix: Pin base images by digest (`python:3.11-slim@sha256:...`, `mysql:8.0.x`) and refresh on a
+schedule.
 
-### [VULN-B09] No max length on chat input (cost/resource amplification)
-File: backend/api/schemas.py lines 65-81; backend/api/routes/chat.py line 28
+### [VULN-012] No dependency vulnerability scanning of the pinned manifests
+File: `requirements.txt` (all lines), `frontend-requirements.txt` (all lines)
 Severity: INFO
-Description: `ChatRequest.message` enforces only `min_length=1`; no `max_length`. A very large message
-is forwarded into the LLM prompt and embedding call, enabling token/cost amplification and resource
-pressure (compounded by the lack of rate limiting in VULN-B02).
-Fix: Add a reasonable `max_length` (e.g. a few thousand chars) to `message` and `session_id`, and/or
-a body-size limit at the server/proxy.
+Description: Dependencies are pinned to specific versions but there is no evidence of a CVE
+scan (`pip-audit` / Dependabot). Pinned-but-stale versions accumulate known CVEs over time.
+`npm audit` is N/A (no Node manifest in scope). Versions could not be cross-checked against a
+live advisory DB in this offline review.
+Fix: Add `pip-audit` (or Dependabot/Renovate) to CI against both manifests and triage
+HIGH/CRITICAL findings each sprint.
 
-### [VULN-B10] Test fixtures contain placeholder credentials (benign)
-File: tests/unit/test_pinecone_client.py (multiple lines); tests/unit/test_groq_client.py (multiple); tests/unit/test_llm_provider.py lines 30, 35
+### [VULN-013] Test fixtures contain dummy credentials (verified non-production)
+File: `tests/unit/test_groq_client.py` lines 74-123, `tests/unit/test_llm_provider.py`
+lines 30, 35
 Severity: INFO
-Description: Test files use literal fixture keys such as `api_key="x"` and `GROQ_API_KEY="gsk-test"`.
-These are obvious non-production placeholders used to construct fakes; they are not real credentials
-and are not used in any production config path.
-Fix: None required. Reported per policy; benign.
+Description: Test files pass `GROQ_API_KEY="gsk-test"` to fixtures. These are obvious
+non-functional placeholders, are not the production values, and are confined to unit tests.
+Recorded per the test-file scanning rule; no action required.
+Fix: None required. Optionally centralize the dummy value in a shared fixture constant.
 
-## Dependency note (Group B)
-File: requirements.txt
-All runtime deps pinned (fastapi 0.136.3, uvicorn 0.48.0, pydantic 2.12.5, pydantic-settings 2.13.1,
-python-dotenv 1.2.2, google-genai 1.68.0, groq 1.4.0, pinecone 9.0.1, mysql-connector-python 9.1.0).
-No automated CVE scan (`pip-audit`/`safety`) available in this environment; recommend running one in
-CI against these pins. No obviously vulnerable pin identified by inspection.
+## Notes on areas reviewed and found clean
+- SQL access (`backend/repositories/product_repository.py`, `backend/repositories/db.py`):
+  all queries are parameterized (`%s` placeholders; the `IN (...)` placeholder list is built
+  from the count of IDs, not their values); no string interpolation of user data into SQL.
+  SQL injection: clean.
+- Schema application (`db.init_schema`, `scripts/init_db.py`) reads a fixed bundled
+  `sql/schema.sql`; no user input reaches statement construction.
+- Entrypoint/init scripts (`docker/entrypoint-backend.sh`, `init.sh`) use `set -euo pipefail`
+  and quote variables; the Python socket-wait uses operator-controlled env vars, not
+  request-controlled input — no command injection from end-user input.
+- Config (`backend/core/config.py`) stores secrets as `SecretStr`; `connection_params` does
+  not log the password; error middleware (`backend/api/middleware.py`) never leaks stack
+  traces or internal detail to clients (verified by integration tests).
+- No `eval`/`pickle`/`yaml.load`/`subprocess` on untrusted data; no SSRF (server fetches only
+  fixed cloud SDK endpoints, not user-supplied URLs); no path traversal (file paths are
+  module-relative constants, not request-derived).
