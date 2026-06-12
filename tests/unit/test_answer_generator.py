@@ -1,11 +1,12 @@
-"""Unit tests for E6-S2 — Grounded RAG answer generation (Gemini).
+"""Unit tests for E6-S2 — Grounded RAG answer generation (LLM provider).
 
-Gemini is the external boundary and is mocked via an injected ``generate_fn``;
-no live API is called. Tests assert that the generation prompt contains only the
-supplied products (AC-1), that the model invocation uses the configured
-``gemini-1.5-flash`` model (AC-4), that empty context yields a friendly no-match
-message with category suggestions without calling the model (AC-3), and that an
-SDK failure surfaces the BRD user-facing message rather than a stack trace (AC-5).
+The LLM provider (Groq by default, Gemini legacy) is the external boundary and
+is mocked via an injected ``generate_fn``; no live API is called. Tests assert
+that the generation prompt contains only the supplied products (AC-1), that the
+model invocation uses the configured generation model from settings (AC-4), that
+empty context yields a friendly no-match message with category suggestions
+without calling the model (AC-3), and that an SDK failure surfaces the BRD
+user-facing message rather than a stack trace (AC-5).
 """
 
 from decimal import Decimal
@@ -71,7 +72,7 @@ class _RecordingGenerate:
 
 class _FailingGenerate:
     def __call__(self, *, model: str, prompt: str) -> str:
-        raise RuntimeError("Gemini 503 backend unavailable")
+        raise RuntimeError("LLM provider 503 backend unavailable")
 
 
 class TestGroundedGeneration:

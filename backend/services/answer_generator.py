@@ -15,8 +15,8 @@ Two acceptance criteria shape the control flow:
 * Empty context (no retrieved products) short-circuits *before* any model call
   and returns a friendly no-match message that suggests the available catalog
   categories rather than inventing products (AC-3).
-* A Gemini failure is caught at this service boundary, classified as a typed
-  :class:`GenerationError` (so no raw SDK type leaks into our logs/handling),
+* An LLM provider failure is caught at this service boundary, classified as a
+  typed :class:`GenerationError` (so no raw SDK type leaks into our logs/handling),
   logged at ERROR, and translated into the BRD user-facing message
   (:data:`UNAVAILABLE_MESSAGE`) rather than surfacing an exception or stack
   trace to the caller (AC-5). This acceptance-criterion-mandated degradation is
@@ -54,7 +54,11 @@ _NO_MATCH_MESSAGE = (
 
 
 class AnswerGenerator:
-    """Grounded Gemini answer generation over hydrated products (E6-S2)."""
+    """Grounded LLM answer generation over hydrated products (E6-S2).
+
+    Uses the configured generation provider (Groq by default, Gemini legacy) via
+    the injected ``generate_fn``; see :mod:`backend.services.llm_provider`.
+    """
 
     def __init__(self, settings: Settings, *, generate_fn: GenerateFn | None = None) -> None:
         self._model = settings.active_generation_model()
@@ -87,7 +91,7 @@ class AnswerGenerator:
                 "answer_generator.generation_failed",
                 extra={"model": self._model, "product_count": product_count},
             )
-            error = GenerationError(f"Gemini generation request failed: {exc}")
+            error = GenerationError(f"LLM generation request failed: {exc}")
             return _user_message_for(error)
         logger.debug(
             "answer_generator.raw_response",
