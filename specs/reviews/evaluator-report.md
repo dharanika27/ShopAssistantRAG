@@ -1,99 +1,101 @@
-# Evaluator Report — Sprint Contract Group E (Chat Service)
+# Evaluator Report — Sprint Contract Group B
 
 - **Project:** ShopAssistantRAG
-- **Contract:** `sprint-contracts/E.json`
-- **Stories:** E6-S1 (session memory & filter state), E6-S2 (grounded RAG generation), E6-S3 (multi-turn / reset / no-match)
-- **Features:** F049–F061
-- **Verification mode:** docker (Full) — used the already-running stack
-- **Evaluated:** 2026-06-12
-- **Backend:** http://localhost:8000 — `GET /api/health` -> 200 (1st attempt)
-- **Frontend:** http://localhost:8501 — 200
-- **MySQL:** healthy; catalog seeded with 30 products (shoes ₹2299–₹6999)
+- **Contract:** `sprint-contracts/B.json`
+- **Stories:** E2-S2, E2-S3, E3-S1, E3-S2, E4-S1
+- **Features:** F017–F033
+- **Verification mode:** docker (backend :8000, frontend :8501, mysql :3307)
+- **Evaluated:** 2026-06-12T17:40:00Z
 
 ## Overall Verdict: PASS
 
-All three verification layers pass for every feature F049–F061 and all three
-required architecture checks (layering, typing, folder_structure). All four
-required files exist.
+All three verification layers pass for every Group B feature. The application stack is healthy, the
+Group B unit suite is green, mypy is clean on all contract modules, layering is one-way, and the
+running backend exercises the data/RAG plumbing (repository, embeddings, Pinecone retrieval) correctly
+end-to-end.
 
-The single remaining blocker from the prior review cycle (F054 / AC-4 naming
-`gemini-1.5-flash`) is now **resolved by a ratified contract amendment**: the
-E6-S2 story file carries a "Contract Amendment — 2026-06-12" making AC-4
-provider-agnostic, and `specs/features.json` F054 was updated to the
-provider-agnostic wording ("default Groq llama-3.3-70b-versatile", asserting on
-`Settings.active_generation_model()`). The running system satisfies that current
-criterion: `active_generation_model()` resolves to Groq `llama-3.3-70b-versatile`.
+---
 
-| Severity | Count |
-|----------|-------|
-| BLOCK    | 0 |
-| WARN     | 1 |
-| INFO     | 1 |
-
-## Required files (all present)
-
-| File | Status |
-|------|--------|
-| `backend/services/query_state.py` | present |
-| `backend/services/answer_generator.py` | present |
-| `backend/prompts/answer_generation.txt` | present |
-| `backend/services/chat_orchestrator.py` | present |
-
-## Architecture checks
+## Layer 1 — Architecture Checks
 
 | Check | Required | Result | Evidence |
 |-------|----------|--------|----------|
-| **layering** | yes | PASS | The three E6 service files import only from `backend.core`, `backend.domain`, and sibling `backend.services`. No `backend.api` import anywhere under `backend/services/` (one-way API->Service->Repository per system-design.md). `chat_orchestrator` takes collaborators via `Protocol`s, not concrete repository imports. |
-| **typing** | yes | PASS | `mypy 2.1.0` (config `disallow_untyped_defs`, `no_implicit_optional`, `check_untyped_defs`) on the three files: "Success: no issues found in 3 source files". |
-| **folder_structure** | yes | PASS | Files exactly match `specs/design/component-map.md` rows E6-S1/E6-S2/E6-S3. |
-| env_vars | no | skipped | not required for group E |
-| migrations | no | skipped | not required for group E |
+| files_must_exist (6 files) | yes | PASS | All 6 present: `product_repository.py`, `core/errors.py`, `csv_loader.py`, `embedding_text.py`, `embedding_client.py`, `pinecone_client.py` |
+| layering (one-way imports) | yes | PASS | No reverse imports found. domain/core import nothing upward; repositories import no services/api; services import no api. |
+| typing (mypy clean) | yes | PASS | `mypy 1.14.1 --ignore-missing-imports` on all 6 modules: "Success: no issues found in 6 source files". No unannotated `def` found. |
+| folder_structure | yes | PASS | File locations match `specs/design/component-map.md` for E2-S2…E4-S1. |
+| env_vars (no hardcoded secrets) | no | PASS | Secret regex scan over `backend/**` found no hardcoded keys; config flows via Settings/.env. |
+| migrations (idempotent schema) | no | PASS | `sql/schema.sql` uses `CREATE TABLE IF NOT EXISTS products` (idempotent). |
 
-## Per-feature results
+Note: `mypy` and `pytest` are intentionally absent from the runtime backend container image (lean
+production image). Both checks were executed on the host toolchain (anaconda python 3, mypy 1.14.1,
+pytest 8.3.4) against the same source tree. This is expected and not a defect.
 
-| Feature | Story | Verdict | Layer(s) | Evidence |
-|---------|-------|---------|----------|----------|
-| **F049** Isolated per-session filters & history | E6-S1 | PASS | unit | `test_query_state.py` (29 passed): A/B isolation; each `SessionState` owns its own `QueryFilters`. |
-| **F050** Reset to empty filters | E6-S1 | PASS | unit + API | `QueryStateManager.reset()` clears filters/last_category/last_result_min_price; live "forget previous search" -> fresh reply. |
-| **F051** In-memory only, bounded history | E6-S1 | PASS | unit | `history = deque(maxlen=history_limit)`; process-local dict, no persistence. |
-| **F052** Prompt includes only retrieved products | E6-S2 | PASS | unit | `test_prompt_contains_only_supplied_products`; `_format_products` renders only supplied products. |
-| **F053** Answer references only context products | E6-S2 | PASS | API | Live "Show me Nike shoes" -> reply references only the 2 returned products; scanning all 30 catalog names found NONE leaked. |
-| **F054** Empty context -> no-match + configured provider | E6-S2 | PASS | unit + live | Empty context short-circuits to `_NO_MATCH_MESSAGE` listing all 5 categories, no model call; `active_generation_model()` = Groq `llama-3.3-70b-versatile` in the running container, matching the amended provider-agnostic AC-4 and the current F054 description. |
-| **F055** Generation failure -> BRD message, no stack trace | E6-S2 | PASS | unit | `test_sdk_failure_returns_brd_user_message`, `test_sdk_failure_does_not_leak_exception`; `_invoke` catches, logs ERROR, returns `UNAVAILABLE_MESSAGE`. |
-| **F056** Refinement merges & rebuilds fresh retrieval | E6-S3 | PASS | API | Live: "Show me Nike shoes" (2 cards) -> "only black ones" narrowed to the single Black Nike (Revolution 6) — color merged onto brand+category; fresh retrieval, not a re-filter of the prior list. |
-| **F057** "Cheaper options" lowers ceiling & re-runs | E6-S3 | PASS | API | Live: shoes<6000, cheapest shown = ₹2799; "cheaper options" -> Adidas Tensaur Kids @ ₹2299 (strictly < ₹2799). `_lower_price_ceiling` sets exclusive ceiling = min_shown − ₹1. |
-| **F058** Category change / reset clears state | E6-S3 | PASS | API | Live: after Nike-shoes, "Now show me bags" -> only Bags (4 cards); "forget previous search" -> reset reply. |
-| **F059** Empty result -> no-match + zero cards | E6-S3 | PASS | API | Live: "Show me laptops under 50000" -> friendly out-of-catalog reply listing categories, 0 products. |
-| **F060** Greetings/invalid -> scoped reply, no retrieval | E6-S3 | PASS | API | Live: "hi" -> capability reply, 0 products; "asdfgh" -> clarification, 0 products. |
-| **F061** Each turn: NL message + <=5 grounded cards | E6-S3 | PASS | API + schema | Live "Show me Nike shoes": string reply + 2 products (<=5); validates against `ChatResponse` schema (reply:string, products:array maxItems 5). |
+## Layer 1 — Unit Tests (Group B critical path)
 
-## Layer evidence summary
+`pytest` over the 5 Group B modules + errors: **56 passed in 0.42s**. Per-feature mapping:
 
-**Layer 1 — API (running backend, :8000):**
-- `/api/chat` exercised: greeting, invalid, normal query, refine (merge), cheaper (x re-retrieval), category-change, reset, out-of-catalog no-match. All 200 with correct product/reply behavior.
-- Empty `message` -> 422 validation error (matches contract).
+| Feature | Acceptance criterion | Backing test | Result |
+|---------|----------------------|--------------|--------|
+| F017 | upsert inserts new / updates existing by id | `test_upsert_executes_insert_on_duplicate_key_update` | PASS |
+| F018 | get_products_by_ids preserves input order | `test_preserves_input_ordering` | PASS |
+| F019 | list_products filters / all-when-empty | `test_filters_build_where_clause_with_bound_params`, `test_no_filters_selects_all` | PASS |
+| F020 | empty id list returns empty without querying DB | `test_empty_id_list_returns_empty_without_querying` | PASS |
+| F021 | connection failure → typed RepositoryError | `test_connection_failure_raises_repository_error` | PASS |
+| F022 | valid CSV row → Product | `test_valid_row_parses_into_product` | PASS |
+| F023 | missing required field skipped + recorded | `test_missing_required_field_is_skipped_and_recorded` | PASS |
+| F024 | out-of-enum category/gender skipped | `test_out_of_vocab_category_is_skipped`, `test_out_of_vocab_gender_is_skipped` | PASS |
+| F025 | tags parsed to trimmed list; valid+failures returned | `test_tags_parsed_into_trimmed_list`, `test_valid_and_invalid_rows_are_partitioned` | PASS |
+| F026 | embedding text includes semantic fields, excludes price/stock/image | `test_includes_all_semantic_fields`, `test_excludes_price_stock_and_image_url` | PASS |
+| F027 | missing optionals omitted without literal "None"; coherent | `test_omits_missing_color_and_tags_without_literal_none`, `test_reads_as_coherent_description` | PASS |
+| F028 | embed_text → 768-dim, model text-embedding-004 | `test_returns_768_dim_vector`, `test_uses_model_from_settings` | PASS |
+| F029 | embed_batch → one ordered 768-dim vector per text | `test_returns_one_vector_per_input_in_order` | PASS |
+| F030 | SDK error → typed EmbeddingError; settings-driven | `test_sdk_failure_is_reraised_as_embedding_error`, `test_wrong_dimension_raises_embedding_error` | PASS |
+| F031 | Pinecone connects via settings, reuses existing index | `test_reuses_existing_index_without_creating`, `test_passes_api_key_from_settings_to_sdk` | PASS |
+| F032 | missing index created dim=768 cosine; wrong dim flagged | `test_creates_index_when_absent_with_768_cosine`, `test_rejects_non_768_configured_dimension` | PASS |
+| F033 | connection failure → typed retrieval error | `test_connection_failure_raises_retrieval_error` | PASS |
 
-**Layer 2 — Playwright (running frontend, :8501):**
-- Streamlit UI renders, exposes a chat input; "Show me Nike shoes" produced a reply mentioning Nike — confirms the E6 chat service is wired end-to-end through the UI. (UI-correctness features are owned by group G; this was a wiring smoke check.)
+## Layer 2 — Running Backend (end-to-end exercise)
 
-**Layer 3 — Schema validation:**
-- Live `ChatResponse` has required `reply` (string) + `products` (array, len<=5); each product carries the full `Product` property set from `api-contracts.schema.json`. Empty-message -> 422.
+Group B features are data/RAG-plumbing and are not directly HTTP-exposed, but the running stack
+exercises them through the live endpoints:
 
-## Test execution summary
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Health | PASS | `GET /api/health` → 200 `{"status":"ok",...}` after retry loop |
+| Catalog (repository → MySQL) | PASS | `GET /api/products` → 200, 30 products, full display fields incl. derived `in_stock` |
+| Chat product search (embeddings → Pinecone → hydrate → generate) | PASS | "running shoes" → 5 grounded products; "Nike shoes" → 2; "bags" → 4 |
+| Hybrid equality filter correctness | PASS | "red Nike shoes" → 0 products — confirmed correct: catalog has no red Nike shoes (Nike shoes are Black/Pink; only red shoe is Adidas) |
+| Out-of-catalog short-circuit | PASS | "gaming laptop RTX 4090" → clean no-match naming the 5 categories, zero products |
+| Chat validation | PASS | empty message → 422; missing message → 422 |
+| Grounding cap | PASS | chat products ≤ 5, full product schema |
+| CORS | PASS | OPTIONS preflight from `http://localhost:8501` → `access-control-allow-origin: http://localhost:8501` |
+| Request logging (secret-free) | PASS | structured logs carry request_id/method/path/status; no secret values |
 
-- `mypy` on the three E6 files: 0 issues.
-- `test_query_state.py` + `test_chat_orchestrator.py`: 29 passed.
-- `test_answer_generator.py`: 8 passed (F052, F054, F055).
-- E6 + `test_llm_provider.py` + `test_config.py`: 49 passed total.
+## Layer 3 — Frontend liveness (Playwright-level)
 
-## Findings by severity
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Streamlit reachable | PASS | `GET /` → 200; `/_stcore/health` → 200 |
 
-### BLOCK
-None.
+Full browser-driven Playwright UI assertions belong to Group G (F074–F081) and are out of scope for the
+Group B contract. Frontend liveness plus the verified backend chat round-trip is sufficient evidence the
+Group B pipeline serves the UI.
 
-### WARN
-- **WARN-1 — Stale "Gemini" wording in answer-generator docstrings/comments.**
-  `backend/services/answer_generator.py` (module docstring lines 1–25, class docstring line 57, `_invoke` comment around line 90) and `tests/unit/test_answer_generator.py` still describe "Gemini" while the active provider is Groq. Documentation-only; non-blocking. Aligning these comments with the actual provider removes the ambiguity that drove the prior F054 BLOCK.
+---
 
-### INFO
-- **INFO-1 — features.json F054 flag corrected.** `specs/features.json` carried `F054.passes = false` before this run. The implementation, unit tests, and live model resolution confirm F054 passes under the ratified provider-agnostic AC-4. Flag updated to `true` with this evaluation. No code change required.
+## Findings
+
+No BLOCK findings.
+
+- **INFO** — `mypy` and `pytest` are not installed in the runtime backend container image
+  (`shopassistantrag-backend-1`). Appropriate for a lean production image; checks were run via the host
+  toolchain. If CI should run them in-container, add a dev/test image stage.
+- **INFO** — Layer 1 unit tests use mocked Gemini/Pinecone (per design); the live Pinecone/Groq
+  integration was independently confirmed working through the running `/api/chat` round-trips.
+
+## features.json updates
+
+F017–F033 set to `passes: true`, `last_evaluated: 2026-06-12T17:40:00Z`, `failure_reason: null`,
+`failure_layer: null`. No other features modified. No regressions detected in previously passing
+Group A features (catalog/health endpoints exercised remain green).

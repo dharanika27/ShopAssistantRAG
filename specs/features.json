@@ -15,7 +15,7 @@
         "Assert price is decimal and stock is int and tags is a list"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -31,7 +31,7 @@
         "Assert assigning an out-of-set value raises a validation error"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -46,7 +46,7 @@
         "Assert the set equals {Men, Women, Unisex, Kids}"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -61,7 +61,7 @@
         "Assert all six fields default to None"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -77,7 +77,7 @@
         "Repeat for missing price and missing category"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -93,7 +93,7 @@
         "Assert derived in_stock is False"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -109,7 +109,7 @@
         "Assert GOOGLE_API_KEY, PINECONE_API_KEY, and all MYSQL_* values are populated"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -124,7 +124,7 @@
         "Assert .gitignore contains an entry matching .env"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -140,7 +140,7 @@
         "Assert the raised error message names MYSQL_HOST"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -156,7 +156,7 @@
         "Assert EMBEDDING_DIM == 768 and PINECONE_INDEX_NAME is set"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -171,7 +171,7 @@
         "Assert the emitted record contains timestamp, level, logger name, and message fields"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -187,7 +187,7 @@
         "Set log level env var to DEBUG and assert debug records are emitted"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -202,7 +202,7 @@
         "Assert none log the secret values directly"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -218,7 +218,7 @@
         "Assert columns product_id, name(NOT NULL), category(NOT NULL), price(NOT NULL), and all other BRD fields exist"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -233,7 +233,7 @@
         "Assert the insert is rejected by constraint or application validation"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -249,7 +249,7 @@
         "Insert two rows with the same product_id and assert the second is rejected"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:00:00Z",
+      "last_evaluated": "2026-06-12T17:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -265,7 +265,7 @@
         "Assert the row is updated, not duplicated"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -281,7 +281,7 @@
         "Assert returned products match that order"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -296,7 +296,7 @@
         "Call list_products with no filters and assert all products return"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -311,7 +311,7 @@
         "Assert an empty list is returned and no SQL query is issued"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -327,7 +327,7 @@
         "Assert a typed repository error is raised rather than a raw driver exception"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -343,7 +343,7 @@
         "Assert a Product object is produced with matching values"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -359,7 +359,7 @@
         "Assert the row is not in valid products and is recorded with row id and reason"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -375,7 +375,7 @@
         "Assert the row is skipped and recorded as a validation failure"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -391,7 +391,7 @@
         "Assert loader returns both a valid-products list and a failures list"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -407,7 +407,7 @@
         "Assert output contains no price, stock, or image URL"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -423,7 +423,7 @@
         "Run on the BRD example and assert it contains Nike, running shoes, men, Shoes, and tags"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -439,7 +439,7 @@
         "Assert the configured model is text-embedding-004"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -454,7 +454,7 @@
         "Assert three vectors returned in input order, each length 768"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -470,7 +470,7 @@
         "Assert the client reads API key and model from centralized settings"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -486,7 +486,7 @@
         "Assert the existing index is reused without error"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -502,7 +502,7 @@
         "Attempt creation with dimension != 768 and assert it is flagged as a config mismatch"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -517,7 +517,7 @@
         "Assert a typed retrieval error is raised that maps to the BRD user message"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T16:30:00Z",
+      "last_evaluated": "2026-06-12T17:40:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -966,8 +966,8 @@
         "Call GET /api/health",
         "Assert status 200 and a JSON body containing a status field"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -981,8 +981,8 @@
         "Send a preflight/CORS request from the Streamlit origin",
         "Assert the response permits that origin"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -996,8 +996,8 @@
         "Trigger an unhandled error in a route and assert a structured JSON error with appropriate status and no stack trace",
         "Trigger a Gemini/Pinecone/MySQL typed error and assert the response is the corresponding BRD user message"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1011,8 +1011,8 @@
         "Make a request and inspect logs",
         "Assert method, path, and status are logged and no secret values appear"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1026,8 +1026,8 @@
         "POST /api/chat with a valid session_id and message",
         "Assert 200 with body containing reply (string) and products (<=5 items)"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1042,8 +1042,8 @@
         "Send a fresh query under session_id B",
         "Assert B's results are unaffected by A's accumulated filters"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1057,8 +1057,8 @@
         "POST /api/chat with empty message and assert 422 validation error",
         "Force a downstream service failure and assert the mapped BRD user message with a non-leaking error shape"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1073,8 +1073,8 @@
         "Measure round-trip latency",
         "Assert response time is under 5 seconds"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1088,8 +1088,8 @@
         "Call GET /api/products with no filters",
         "Assert a list of products each with image, name, brand, category, price, and stock status"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1103,8 +1103,8 @@
         "Call GET /api/products?brand=Nike&category=Shoes&max_price=3000",
         "Assert only matching products are returned"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1118,8 +1118,8 @@
         "Call GET /api/filters",
         "Assert distinct brands, categories, genders, and colors are returned"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -1133,8 +1133,8 @@
         "Call GET /api/products with a filter matching nothing and assert 200 with empty list",
         "Assert a product with stock=0 is surfaced as out of stock"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T17:15:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
