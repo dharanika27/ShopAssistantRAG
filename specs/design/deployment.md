@@ -66,7 +66,7 @@ Secrets in CI are injected as GitHub Actions secrets (`GOOGLE_API_KEY`, `PINECON
 
 - All secrets via `.env` (gitignored) injected as container `environment` / `env_file` (BRD §6.5, E10-S1 AC-5). **Never baked into images.**
 - `.env.example` lists every key with placeholder values (E1-S2 AC-2).
-- Required keys: `GOOGLE_API_KEY`, `PINECONE_API_KEY`, `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`. Defaults (non-secret): `PINECONE_INDEX_NAME`, `EMBEDDING_MODEL=text-embedding-004`, `GENERATION_MODEL=gemini-1.5-flash`, `EMBEDDING_DIM=768`, `LOG_LEVEL=INFO`, `BACKEND_URL`.
+- Required keys: `GOOGLE_API_KEY`, `PINECONE_API_KEY`, `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`. Defaults (non-secret): `PINECONE_INDEX_NAME`, `EMBEDDING_MODEL=text-embedding-004`, `LLM_PROVIDER=groq`, `GROQ_MODEL=llama-3.3-70b-versatile` (generation; `GENERATION_MODEL=gemini-1.5-flash` legacy), `EMBEDDING_DIM=768`, `LOG_LEVEL=INFO`, `BACKEND_URL`.
 - Logs are secret-free (E1-S3 AC-4).
 
 ---

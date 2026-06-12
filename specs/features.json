@@ -15,7 +15,7 @@
         "Assert price is decimal and stock is int and tags is a list"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -31,7 +31,7 @@
         "Assert assigning an out-of-set value raises a validation error"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -46,7 +46,7 @@
         "Assert the set equals {Men, Women, Unisex, Kids}"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -61,7 +61,7 @@
         "Assert all six fields default to None"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -77,7 +77,7 @@
         "Repeat for missing price and missing category"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -93,7 +93,7 @@
         "Assert derived in_stock is False"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -109,7 +109,7 @@
         "Assert GOOGLE_API_KEY, PINECONE_API_KEY, and all MYSQL_* values are populated"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -124,7 +124,7 @@
         "Assert .gitignore contains an entry matching .env"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -140,7 +140,7 @@
         "Assert the raised error message names MYSQL_HOST"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -156,7 +156,7 @@
         "Assert EMBEDDING_DIM == 768 and PINECONE_INDEX_NAME is set"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -171,7 +171,7 @@
         "Assert the emitted record contains timestamp, level, logger name, and message fields"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -187,7 +187,7 @@
         "Set log level env var to DEBUG and assert debug records are emitted"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -202,7 +202,7 @@
         "Assert none log the secret values directly"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -218,7 +218,7 @@
         "Assert columns product_id, name(NOT NULL), category(NOT NULL), price(NOT NULL), and all other BRD fields exist"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -233,7 +233,7 @@
         "Assert the insert is rejected by constraint or application validation"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -249,7 +249,7 @@
         "Insert two rows with the same product_id and assert the second is rejected"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:44:12Z",
+      "last_evaluated": "2026-06-12T16:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -264,8 +264,8 @@
         "upsert_product again with the same product_id but changed price",
         "Assert the row is updated, not duplicated"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -280,8 +280,8 @@
         "Call get_products_by_ids with IDs in a specific order",
         "Assert returned products match that order"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -295,8 +295,8 @@
         "Call list_products with brand=Nike and assert only Nike products return",
         "Call list_products with no filters and assert all products return"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -310,8 +310,8 @@
         "Call get_products_by_ids with an empty list",
         "Assert an empty list is returned and no SQL query is issued"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -326,8 +326,8 @@
         "Invoke a repository method",
         "Assert a typed repository error is raised rather than a raw driver exception"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -342,8 +342,8 @@
         "Run the loader",
         "Assert a Product object is produced with matching values"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -358,8 +358,8 @@
         "Run the loader",
         "Assert the row is not in valid products and is recorded with row id and reason"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -374,8 +374,8 @@
         "Run the loader",
         "Assert the row is skipped and recorded as a validation failure"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -390,8 +390,8 @@
         "Run the loader and assert tags == ['Running','Sports','Casual']",
         "Assert loader returns both a valid-products list and a failures list"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -406,8 +406,8 @@
         "Assert output contains name, description, brand, category, gender, color, tags",
         "Assert output contains no price, stock, or image URL"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -422,8 +422,8 @@
         "Assert the word 'None' does not appear in the output",
         "Run on the BRD example and assert it contains Nike, running shoes, men, Shoes, and tags"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -438,8 +438,8 @@
         "Assert the returned vector length is exactly 768",
         "Assert the configured model is text-embedding-004"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -453,8 +453,8 @@
         "Call embed_batch with three texts",
         "Assert three vectors returned in input order, each length 768"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -469,8 +469,8 @@
         "Assert a typed embedding error is raised, not the raw SDK exception",
         "Assert the client reads API key and model from centralized settings"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -485,8 +485,8 @@
         "Assert connection uses PINECONE_API_KEY from settings",
         "Assert the existing index is reused without error"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -501,8 +501,8 @@
         "Assert it is created with dimension 768 and cosine metric",
         "Attempt creation with dimension != 768 and assert it is flagged as a config mismatch"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -516,8 +516,8 @@
         "Force a Pinecone connection failure",
         "Assert a typed retrieval error is raised that maps to the BRD user message"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T16:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -533,7 +533,7 @@
         "Assert each vector carries brand, color, category, gender, price metadata"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:14:33Z",
+      "last_evaluated": "2026-06-12T15:56:08Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -549,7 +549,7 @@
         "Assert price metadata is numeric so range filters apply"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:14:33Z",
+      "last_evaluated": "2026-06-12T15:56:08Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -565,7 +565,7 @@
         "Assert all 1000 vectors are present afterward"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:14:33Z",
+      "last_evaluated": "2026-06-12T15:56:08Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -581,7 +581,7 @@
         "Assert corresponding vectors are upserted into Pinecone"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:14:33Z",
+      "last_evaluated": "2026-06-12T15:56:08Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -597,7 +597,7 @@
         "Assert both failures are counted and the failed product is excluded from Pinecone"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:14:33Z",
+      "last_evaluated": "2026-06-12T15:56:08Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -612,7 +612,7 @@
         "Re-run on the same CSV and assert records are updated, not duplicated, in MySQL and Pinecone"
       ],
       "passes": true,
-      "last_evaluated": "2026-06-12T14:14:33Z",
+      "last_evaluated": "2026-06-12T15:56:08Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -626,8 +626,8 @@
         "Extract filters from 'Show me red Nike shoes under 3000' (mock Gemini JSON)",
         "Assert result equals {brand: Nike, color: Red, category: Shoes, max_price: 3000}"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -641,8 +641,8 @@
         "Extract filters from a query using 'Crimson' and 'Trainers'",
         "Assert color normalizes to Red and category normalizes to Shoes"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -656,8 +656,8 @@
         "Extract from a query naming an unknown color and assert that field is None",
         "Extract from 'under 500' and assert max_price=500 with all other filters None"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -672,8 +672,8 @@
         "Run extraction",
         "Assert an empty QueryFilters (all None) is returned and no exception propagates"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -687,8 +687,8 @@
         "Call retrieve with filters brand=Nike, category=Shoes (mock Pinecone)",
         "Assert the Pinecone query includes equality metadata filters for those fields"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -703,8 +703,8 @@
         "Assert a numeric range filter on price metadata is sent to Pinecone",
         "Assert returned results are ordered by similarity score"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -718,8 +718,8 @@
         "Call retrieve against a populated mock and assert at most 5 IDs returned",
         "Call retrieve with filters matching nothing and assert an empty list with no error"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -733,8 +733,8 @@
         "Hydrate a ranked ID list [id3, id1, id2]",
         "Assert full Product objects are returned in that exact order"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -748,8 +748,8 @@
         "Hydrate a list containing one ID not present in MySQL and assert it is skipped and logged",
         "Hydrate an empty list and assert empty result with no MySQL query issued"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T00:00:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -764,8 +764,8 @@
         "Update filters in session A",
         "Assert session B filters are unchanged"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -780,8 +780,8 @@
         "Call reset",
         "Assert the session filters are all None"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -795,8 +795,8 @@
         "Add more than N turns to a session and assert history is capped at the bound",
         "Assert no cross-session persistence store is written (memory only)"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -811,8 +811,8 @@
         "Inspect the assembled prompt",
         "Assert it contains only those two products as context"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -826,8 +826,8 @@
         "Generate with a known product set",
         "Assert no product name absent from the context appears in the reply"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -836,14 +836,14 @@
       "category": "functional",
       "story": "E6-S2",
       "group": "E",
-      "description": "Empty context yields a no-match message suggesting categories, using gemini-1.5-flash",
+      "description": "Empty context yields a no-match message suggesting categories; generation uses the configured LLM provider (env-driven; default Groq llama-3.3-70b-versatile)",
       "steps": [
         "Invoke generation with empty context",
         "Assert the reply is a friendly no-match suggesting available categories and invents no product",
-        "Assert the configured generation model is gemini-1.5-flash"
+        "Assert the active generation model matches the configured LLM provider (Settings.active_generation_model())"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -857,8 +857,8 @@
         "Force a Gemini generation failure",
         "Assert the response is 'The AI assistant is temporarily unavailable...' with no stack trace"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -873,8 +873,8 @@
         "Assert turn 2 filters include brand=Nike, category=Shoes, color=Red",
         "Assert a fresh retrieval is run rather than filtering the prior result list"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -889,8 +889,8 @@
         "Send 'cheaper options'",
         "Assert max_price is reduced and retrieval is re-run for lower-priced items"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -905,8 +905,8 @@
         "Assert prior brand/color filters are cleared and category becomes Bags",
         "Send 'forget previous search' and assert all filters reset"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -921,8 +921,8 @@
         "Assert the reply is a friendly no-match with category suggestions",
         "Assert zero product cards are returned"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -936,8 +936,8 @@
         "Send 'hi' and assert a scoped capability response with no retrieval",
         "Send 'asdfgh' and assert a clarification response with no products"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },
@@ -951,8 +951,8 @@
         "Send a normal product query",
         "Assert the response contains an NL message and at most 5 grounded product cards"
       ],
-      "passes": false,
-      "last_evaluated": null,
+      "passes": true,
+      "last_evaluated": "2026-06-12T23:30:00Z",
       "failure_reason": null,
       "failure_layer": null
     },

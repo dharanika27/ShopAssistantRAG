@@ -28,7 +28,7 @@ Hydrator (MySQL get_products_by_ids)         ──►  Product[] (rank-preservi
 Context Assembly (prompt template)           ──►  grounded prompt
    │
    ▼
-AnswerGenerator (gemini-1.5-flash)           ──►  grounded NL reply
+AnswerGenerator (Groq llama-3.3-70b-versatile)           ──►  grounded NL reply
    │
    ▼
 { reply, products[≤5] }
@@ -41,7 +41,7 @@ AnswerGenerator (gemini-1.5-flash)           ──►  grounded NL reply
 | Pipeline component | LangChain primitive | Module |
 |--------------------|---------------------|--------|
 | Gemini embeddings | `GoogleGenerativeAIEmbeddings` (model `text-embedding-004`, 768-dim) | `backend/services/embedding_client.py` |
-| Gemini generation | `ChatGoogleGenerativeAI` (model `gemini-1.5-flash`) | `backend/services/answer_generator.py` |
+| LLM generation | Groq client (model `llama-3.3-70b-versatile`, `LLM_PROVIDER`-selectable; Gemini legacy) | `backend/services/answer_generator.py` |
 | Filter extraction | LLM + structured-output parser (`PydanticOutputParser` / JSON parser over `QueryFilters`) | `backend/services/filter_extractor.py` |
 | Hybrid retrieval | Custom `BaseRetriever` wrapping `PineconeVectorStore` with `search_kwargs={"filter": ..., "k": 5}` | `backend/services/hybrid_retriever.py` |
 | Prompt construction | `ChatPromptTemplate` + `prompts/*.txt` | `backend/prompts/` |
@@ -58,7 +58,7 @@ AnswerGenerator (gemini-1.5-flash)           ──►  grounded NL reply
 
 ```
 filter_extraction_prompt (prompts/filter_extraction.txt)
-   | ChatGoogleGenerativeAI(gemini-1.5-flash, response as JSON)
+   | Groq(llama-3.3-70b-versatile, response as JSON)
    | JSON/Pydantic parser -> raw filters
    | normalize_enums()      # Crimson->Red, Trainers->Shoes; drop out-of-vocab -> None (R-2)
    -> QueryFilters
@@ -85,7 +85,7 @@ Single Pinecone round-trip (D-3). Empty filter set → pure semantic; over-restr
 ```
 answer_generation_prompt (prompts/answer_generation.txt)
    context = format_products(hydrated_products)   # name, brand, category, price, color, stock...
-   | ChatGoogleGenerativeAI(gemini-1.5-flash)
+   | Groq(llama-3.3-70b-versatile)
    -> grounded NL reply
 ```
 

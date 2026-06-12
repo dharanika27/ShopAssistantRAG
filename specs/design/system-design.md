@@ -58,7 +58,7 @@ This satisfies BRD NFR-1 (modular architecture) and NFR-6 (scalable but not over
 | FilterExtractor | `backend/services/filter_extractor.py` | Gemini structured JSON → normalized `QueryFilters`. |
 | HybridRetriever | `backend/services/hybrid_retriever.py` | Pinecone metadata pre-filter + semantic search → top-5 IDs. |
 | Hydrator | `backend/services/hydrator.py` | Pinecone IDs → full `Product` records from MySQL, rank-preserving. |
-| AnswerGenerator | `backend/services/answer_generator.py` | Grounded `gemini-1.5-flash` NL reply from product context. |
+| AnswerGenerator | `backend/services/answer_generator.py` | Grounded LLM NL reply (Groq `llama-3.3-70b-versatile` default, `LLM_PROVIDER`-selectable) from product context. |
 | IngestionPipeline | `backend/services/ingestion.py` | CSV → validate → MySQL upsert → embed → Pinecone upsert + summary. |
 | ProductRepository | `backend/repositories/product_repository.py` | MySQL CRUD, bulk hydrate, list/filter. |
 | PineconeClient | `backend/repositories/pinecone_client.py` | Index provisioning, upsert, query. |
@@ -78,7 +78,7 @@ This satisfies BRD NFR-1 (modular architecture) and NFR-6 (scalable but not over
 | D-5 | Enum normalization layer between Gemini and retrieval | BRD risk R-2 (Crimson→Red, Trainers→Shoes); drops out-of-vocab values. |
 | D-6 | Typed errors at repository/service boundaries mapped to BRD user messages in API middleware | BRD NFR-3 / §9.1 — never leak stack traces. |
 | D-7 | Ingestion is a standalone CLI, not an API | BRD §4.3 — no ingestion API; embedding failures non-fatal. |
-| D-8 | `gemini-1.5-flash` for generation | BRD §6.2 — low latency/cost, <5s target. |
+| D-8 | LLM generation via `LLM_PROVIDER` (Groq `llama-3.3-70b-versatile` default, Gemini legacy) | BRD §6.2 — low latency/cost, <5s target. |
 
 ### 1.5 Data Flows
 

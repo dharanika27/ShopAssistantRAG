@@ -147,7 +147,7 @@ User Query → Filter Extraction (Gemini) → Pinecone Metadata Filter + Vector 
 
 ### 6.2 Gemini Usage
 - **Embeddings**: `text-embedding-004`, 768 dimensions (Pinecone index dimension must match 768).
-- **Generation**: `gemini-1.5-flash` (low latency, low cost; target <5s).
+- **Generation**: `gemini-1.5-flash` (low latency, low cost; target <5s). _Amended 2026-06-12 → Groq `llama-3.3-70b-versatile` via `LLM_PROVIDER` (Gemini legacy); see E6-S2 contract amendment._
 - **Filter extraction**: Gemini structured JSON output, e.g.:
 ```json
 { "brand": "Nike", "color": "Red", "category": "Shoes", "max_price": 3000 }

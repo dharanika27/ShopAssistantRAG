@@ -30,7 +30,7 @@ ShopAssistantRAG/
 │   │   ├── hybrid_retriever.py      # Metadata pre-filter + semantic search (E5-S2)
 │   │   ├── hydrator.py              # Pinecone IDs → MySQL Product records (E5-S3)
 │   │   ├── query_state.py           # QueryStateManager: session filters + history (E6-S1)
-│   │   ├── answer_generator.py      # Grounded gemini-1.5-flash generation (E6-S2)
+│   │   ├── answer_generator.py      # Grounded LLM generation (Groq llama-3.3-70b-versatile default) (E6-S2)
 │   │   └── chat_orchestrator.py     # End-to-end chat turn + reset/no-match rules (E6-S3)
 │   ├── api/                         # HTTP boundary: FastAPI app, routes, schemas
 │   │   ├── __init__.py
