@@ -22,7 +22,9 @@ is checked at most once per TTL.
 """
 
 import io
+import ipaddress
 from pathlib import Path
+from urllib.parse import urlparse
 
 import streamlit as st
 
@@ -48,6 +50,17 @@ _DEFAULT_PLACEHOLDER = "product-placeholder.jpg"
 _ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 _PROBE_TIMEOUT_SECONDS = 3.0
 
+# SSRF guard: the reachability probe (below) is a server-side request, so it may
+# only target https URLs on these explicitly allow-listed image hosts. An
+# attacker-controlled image_url therefore cannot be used to reach internal
+# services. Extend this set if the catalog adopts a new image CDN.
+ALLOWED_IMAGE_HOSTS: frozenset[str] = frozenset({
+    "loremflickr.com",
+    "picsum.photos",
+    "fastly.picsum.photos",
+    "images.unsplash.com",
+})
+
 
 def placeholder_filename(category: str | None) -> str:
     """Return the placeholder asset filename for ``category`` (pure, testable)."""
@@ -61,19 +74,63 @@ def placeholder_asset_path(category: str | None) -> Path:
     return _ASSETS_DIR / placeholder_filename(category)
 
 
-@st.cache_data(show_spinner=False, ttl=300)
-def _url_reachable(url: str) -> bool:
-    """Return True if ``url`` responds < 400 (cached for 5 min). Never raises."""
+def _host_is_blocked(host: str) -> bool:
+    """True for loopback/private/link-local/reserved targets (incl. cloud metadata)."""
+    normalized = host.lower().strip(".")
+    if normalized == "localhost" or normalized.endswith(".localhost"):
+        return True
+    try:
+        ip = ipaddress.ip_address(normalized)
+    except ValueError:
+        return False  # not an IP literal — the host allowlist governs
+    # Block anything not globally routable: loopback (127.0.0.1/::1), private
+    # (10/172.16/192.168), link-local incl. 169.254.169.254 (metadata), etc.
+    return not ip.is_global
+
+
+def is_allowed_image_url(url: str) -> bool:
+    """SSRF guard: pass only https URLs to an allow-listed, non-internal host."""
+    try:
+        parsed = urlparse(url)
+    except (ValueError, TypeError):
+        return False
+    if parsed.scheme != "https":
+        return False
+    host = parsed.hostname
+    if not host or _host_is_blocked(host):
+        return False
+    return host.lower() in ALLOWED_IMAGE_HOSTS
+
+
+def _probe_reachable(url: str) -> bool:
+    """Server-side reachability probe (uncached).
+
+    Returns ``False`` for any disallowed URL *without making a request* (SSRF
+    guard), never follows redirects, and never raises. A 3xx is treated as
+    reachable (``status_code < 400``) — the browser ``<img>`` follows redirects
+    even though this probe does not.
+    """
+    if not is_allowed_image_url(url):
+        return False
     import requests
 
     try:
         resp = requests.get(
-            url, timeout=_PROBE_TIMEOUT_SECONDS, stream=True, allow_redirects=True
+            url,
+            timeout=_PROBE_TIMEOUT_SECONDS,
+            stream=True,
+            allow_redirects=False,
         )
         resp.close()
     except requests.RequestException:
         return False
     return resp.status_code < 400
+
+
+@st.cache_data(show_spinner=False, ttl=300)
+def _url_reachable(url: str) -> bool:
+    """Cached wrapper over :func:`_probe_reachable` (each URL checked ≤1×/TTL)."""
+    return _probe_reachable(url)
 
 
 @st.cache_data(show_spinner=False)
